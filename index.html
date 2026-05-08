@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
+        /* Obligar al navegador a imprimir los colores de fondo y marcas de agua */
         * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -330,36 +331,41 @@
             margin-bottom: 30px;
         }
         
+        /* SOLUCIÓN AL COLAPSO DE TOTALES: Flotantes estándar que nunca rompen en impresión */
         .totals-wrapper {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 20px;
+            page-break-inside: avoid !important;
         }
         .totals-box {
+            float: right;
             width: 350px;
             background-color: var(--venetian-lace);
             border-radius: 8px;
             padding: 15px 20px;
         }
-        /* Flexbox riguroso para evitar que el PDF rompa la distribución */
         .total-line {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
+            display: block;
+            clear: both;
             padding: 6px 0;
             font-size: 14px;
-            width: 100% !important;
+            width: 100%;
+            overflow: hidden;
         }
-        .total-line span {
-            display: inline-block !important;
+        .total-line span:first-child {
+            float: left;
+        }
+        .total-line span:last-child {
+            float: right;
+            font-weight: 500;
         }
         .total-line.final {
             border-top: 2px solid var(--fence-green);
             margin-top: 5px;
             padding-top: 10px;
+        }
+        .total-line.final span:last-child {
             font-weight: 700;
             font-size: 18px;
             color: var(--fiery-glow);
@@ -372,6 +378,7 @@
             font-size: 12px;
             color: var(--norfolk-green);
             margin-bottom: 35px;
+            clear: both;
         }
 
         .condiciones {
@@ -396,6 +403,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 60px;
             margin-top: 10px;
+            page-break-inside: avoid !important; /* Evita que la firma se divida en 2 hojas */
         }
         .firma-box {
             border-top: 1px solid var(--fence-green);
@@ -418,11 +426,12 @@
 
         /* =======================================================
            🚀 BLINDAJE DE IMPRESIÓN PDF
+           Se eliminan transformaciones para que el navegador rinda 1:1
            ======================================================= */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 15mm 15mm !important; /* Márgenes físicos perfectos */
+                margin: 15mm !important; /* Márgenes físicos perfectos */
             }
             body { 
                 display: block !important; 
@@ -437,14 +446,11 @@
                 box-shadow: none !important; 
                 width: 100% !important; 
                 max-width: 100% !important;
-                margin: 0 auto !important; 
+                margin: 0 !important; 
                 padding: 0 !important; 
                 overflow: visible !important;
                 height: auto !important;
                 min-height: 0 !important;
-                /* Reducimos sutilmente la escala para garantizar que todo encaje sin saltos forzados */
-                transform: scale(0.97);
-                transform-origin: top left;
             }
             
             .watermark-container {
@@ -477,6 +483,9 @@
     </style>
 </head>
 <body>
+
+    <!-- Iframe oculto para método infalible de guardado en Sheets (Adiós CORS) -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
     <div class="control-panel" id="controlPanel">
         <div class="control-row">
@@ -639,12 +648,17 @@
         </div>
     </div>
 
+    <!-- ==========================================================
+         🚀 LÓGICA CON FIREBASE Y GOOGLE SHEETS
+         ========================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CREDENCIALES FIREBASE
+        // ======================================================================
+        // ⚠️ PEGA AQUÍ TUS CREDENCIALES DE FIREBASE
+        // ======================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
             authDomain: "satori-bl-cotizador.firebaseapp.com",
@@ -654,7 +668,9 @@
             appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
         };
         
-        // URL DE TU GOOGLE SHEETS
+        // ======================================================================
+        // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+        // ======================================================================
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxWOkjit1hliGAdvva0w6w1-7GysTcdChrLr382DlGvleUyko_W6lSAaNWdKPbFJPi1rg/exec";
 
         let db, auth, currentUser;
@@ -761,15 +777,27 @@
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
                 await addDoc(colRef, payload);
                 
-                // 2. Sincronización silenciosa a Google Sheets mediante GET (Imposible que bloquee por CORS)
-                const params = new URLSearchParams(payload);
-                params.append("action", "save");
-                fetch(GOOGLE_SHEETS_URL + "?" + params.toString(), {
-                    method: 'GET',
-                    mode: 'no-cors'
-                }).catch(e => console.log("Google Sheets sync ejecutado en background."));
+                // 2. Método Infalible para Google Sheets: Formulario Oculto
+                // Esto bypassa absolutamente todos los bloqueos de CORS del navegador
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = GOOGLE_SHEETS_URL;
+                form.target = 'hidden_iframe';
+                
+                for (let key in payload) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = payload[key];
+                    form.appendChild(input);
+                }
+                document.body.appendChild(form);
+                form.submit();
+                
+                // Limpiar el formulario después de enviarlo
+                setTimeout(() => { document.body.removeChild(form); }, 2000);
 
-                window.mostrarMensaje('☁️ ¡Cotización guardada y sincronizada exitosamente!', 'success');
+                window.mostrarMensaje('☁️ ¡Cotización guardada y sincronizada a Sheets!', 'success');
                 
                 const currentNum = parseInt(payload.consecutivo, 10);
                 if (!isNaN(currentNum)) {
