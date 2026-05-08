@@ -112,6 +112,8 @@
         button.btn-download:hover { background-color: #15803d; }
         button.btn-google { background-color: #4285F4; color: white; height: 35px; }
         button.btn-google:hover { background-color: #3367d6; }
+        button.btn-new { background-color: #64748b; color: white; height: 35px; }
+        button.btn-new:hover { background-color: #475569; }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
 
         input[type="text"], input[type="file"], input[type="date"], textarea {
@@ -162,12 +164,8 @@
             align-items: center;
         }
         
-        .watermark-container svg, 
-        .watermark-container img {
-            width: 100%;
-            height: auto;
-            opacity: 0.04;
-            mix-blend-mode: multiply; 
+        .watermark-container svg, .watermark-container img {
+            width: 100%; height: auto; opacity: 0.04; mix-blend-mode: multiply; 
         }
 
         .editable {
@@ -183,256 +181,71 @@
             background-color: var(--venetian-lace);
             border-color: var(--macadamia);
         }
-        .editable-block {
-            display: block;
-            width: 100%;
-        }
+        .editable-block { display: block; width: 100%; }
 
         .doc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center; 
-            border-bottom: 2px solid var(--fence-green);
-            padding-bottom: 10px; 
-            margin-bottom: 20px; 
-            position: relative;
-            z-index: 1;
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 2px solid var(--fence-green); padding-bottom: 10px; 
+            margin-bottom: 20px; position: relative; z-index: 1;
         }
 
-        .logo-container {
-            width: 280px; 
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start; 
-        }
-        
-        .logo-container img {
-            width: 100%; 
-            max-width: 280px; 
-            height: auto;
-            object-fit: contain;
-            object-position: left center;
-            mix-blend-mode: multiply; 
-            display: block;
-            margin-bottom: -15px; 
-        }
-        
-        .default-logo-svg {
-            width: 150px; 
-            height: auto;
-            margin-bottom: 5px; 
-            display: block;
-        }
+        .logo-container { width: 280px; display: flex; flex-direction: column; align-items: flex-start; }
+        .logo-container img { width: 100%; max-width: 280px; height: auto; object-fit: contain; object-position: left center; mix-blend-mode: multiply; display: block; margin-bottom: -15px; }
+        .default-logo-svg { width: 150px; height: auto; margin-bottom: 5px; display: block; }
 
-        .header-info {
-            text-align: right;
-            margin-top: 0;
-        }
-        .header-info h1 {
-            font-size: 16px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin: 0 0 10px 0;
-            color: var(--norfolk-green);
-            line-height: 1; 
-        }
-        .quote-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--fiery-glow);
-            margin: 0 0 5px 0;
-            font-family: var(--font-heading);
-            line-height: 1;
-        }
-        .header-info p {
-            margin: 3px 0;
-            font-size: 13px;
-            color: var(--fence-green);
-        }
+        .header-info { text-align: right; margin-top: 0; }
+        .header-info h1 { font-size: 16px; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 10px 0; color: var(--norfolk-green); line-height: 1; }
+        .quote-number { font-size: 32px; font-weight: 700; color: var(--fiery-glow); margin: 0 0 5px 0; font-family: var(--font-heading); line-height: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px;}
+        .header-info p { margin: 3px 0; font-size: 13px; color: var(--fence-green); }
 
-        .info-grid {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px; 
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-        .info-block {
-            background-color: transparent; 
-            padding: 0; 
-            border: none;
-            width: 48%; 
-        }
-        .info-block h3 {
-            margin-top: 0;
-            margin-bottom: 12px;
-            font-size: 13px; 
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--fence-green); 
-            border-bottom: 1px solid var(--macadamia); 
-            padding-bottom: 5px;
-        }
-        .info-block p {
-            margin: 6px 0;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-        .info-block strong {
-            font-weight: 600;
-            font-family: var(--font-heading);
-        }
+        .info-grid { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; position: relative; z-index: 1; }
+        .info-block { background-color: transparent; padding: 0; border: none; width: 48%; }
+        .info-block h3 { margin-top: 0; margin-bottom: 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--fence-green); border-bottom: 1px solid var(--macadamia); padding-bottom: 5px; }
+        .info-block p { margin: 6px 0; font-size: 13px; line-height: 1.4; }
+        .info-block strong { font-weight: 600; font-family: var(--font-heading); }
 
-        .objeto-section {
-            margin-bottom: 25px;
-            position: relative;
-            z-index: 1;
-        }
-        .objeto-section h3 {
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: var(--fence-green);
-        }
-        .objeto-textarea {
-            width: 100%;
-            min-height: 40px;
-            font-family: var(--font-body);
-            font-size: 14px;
-            color: var(--fence-green);
-            line-height: 1.5;
-            background: transparent;
-            border: none;
-            resize: none;
-            overflow: hidden;
-            display: block;
-        }
+        .objeto-section { margin-bottom: 25px; position: relative; z-index: 1; }
+        .objeto-section h3 { font-size: 14px; margin-bottom: 8px; color: var(--fence-green); }
+        .objeto-textarea { width: 100%; min-height: 40px; font-family: var(--font-body); font-size: 14px; color: var(--fence-green); line-height: 1.5; background: transparent; border: none; resize: none; overflow: hidden; display: block; }
 
-        .table-responsive-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-bottom: 20px;
-        }
+        .table-responsive-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            position: relative;
-            z-index: 1;
-        }
-        th {
-            background-color: var(--venetian-lace);
-            color: var(--fence-green);
-            padding: 10px 10px;
-            text-align: left;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--fence-green);
-        }
-        td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            vertical-align: top;
-        }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; position: relative; z-index: 1; }
+        th { background-color: var(--venetian-lace); color: var(--fence-green); padding: 10px 10px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--fence-green); }
+        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
         .col-cant { width: 8%; text-align: center; }
         .col-desc { width: 47%; }
         .col-unit { width: 20%; text-align: right; }
         .col-total { width: 25%; text-align: right; font-weight: 500; }
         
-        .action-row {
-            text-align: left;
-            margin-bottom: 30px;
-        }
+        .action-row { text-align: left; margin-bottom: 30px; }
         
-        .totals-wrapper {
-            display: block;
-            width: 100%;
-            margin-bottom: 20px;
-            page-break-inside: avoid !important;
-        }
-        .totals-table {
-            width: 350px;
-            margin-left: auto; 
-            background-color: var(--venetian-lace);
-            border-radius: 8px;
-            padding: 15px 20px;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-bottom: 0;
-        }
-        .totals-table td {
-            padding: 6px 0;
-            font-size: 14px;
-            border: none;
-            background: transparent;
-            color: var(--fence-green);
-        }
-        .totals-table tr.final td {
-            border-top: 2px solid var(--fence-green);
-            font-weight: 700;
-            font-size: 18px;
-            color: var(--fiery-glow);
-            font-family: var(--font-heading);
-            padding-top: 10px;
-            margin-top: 5px;
-        }
+        .totals-wrapper { display: block; width: 100%; margin-bottom: 20px; page-break-inside: avoid !important; }
+        .totals-table { width: 350px; margin-left: auto; background-color: var(--venetian-lace); border-radius: 8px; padding: 15px 20px; border-collapse: separate; border-spacing: 0; margin-bottom: 0; }
+        .totals-table td { padding: 6px 0; font-size: 14px; border: none; background: transparent; color: var(--fence-green); }
+        .totals-table tr.final td { border-top: 2px solid var(--fence-green); font-weight: 700; font-size: 18px; color: var(--fiery-glow); font-family: var(--font-heading); padding-top: 10px; margin-top: 5px; }
         .text-right { text-align: right; }
 
-        .total-letras {
-            text-align: right;
-            font-style: italic;
-            font-size: 12px;
-            color: var(--norfolk-green);
-            margin-bottom: 35px;
-            clear: both;
-        }
+        .total-letras { text-align: right; font-style: italic; font-size: 12px; color: var(--norfolk-green); margin-bottom: 35px; clear: both; }
 
-        .condiciones {
-            border-top: 1px solid #cbd5e1;
-            padding-top: 15px;
-            margin-bottom: 60px; 
-            font-size: 11px;
-            color: #475569;
-            line-height: 1.6;
-        }
-        .condiciones h4 { 
-            margin-top: 0; 
-            font-size: 12px; 
-            color: var(--fence-green);
-            text-transform: uppercase;
-        }
+        .condiciones { border-top: 1px solid #cbd5e1; padding-top: 15px; margin-bottom: 60px; font-size: 11px; color: #475569; line-height: 1.6; }
+        .condiciones h4 { margin-top: 0; font-size: 12px; color: var(--fence-green); text-transform: uppercase; }
         .condiciones ul { padding-left: 15px; margin: 0; }
         .condiciones li { margin-bottom: 5px; }
 
-        .firmas-grid {
-            display: flex;
-            justify-content: space-between;
-            gap: 40px;
-            margin-top: 10px;
-            page-break-inside: avoid !important;
-        }
-        .firma-box {
-            width: 48%; 
-            border-top: 1px solid var(--fence-green);
-            padding-top: 10px;
-        }
+        .firmas-grid { display: flex; justify-content: space-between; gap: 40px; margin-top: 10px; page-break-inside: avoid !important; }
+        .firma-box { width: 48%; border-top: 1px solid var(--fence-green); padding-top: 10px; }
         .firma-box h4 { margin: 0 0 3px 0; font-size: 13px; color: var(--fence-green); }
         .firma-box p { margin: 0; font-size: 11px; color: var(--norfolk-green); }
 
-        .btn-remove {
-            color: var(--fiery-glow);
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 18px;
-            padding: 0 5px;
-            opacity: 0.5;
-            transition: opacity 0.2s;
-        }
+        .btn-remove { color: var(--fiery-glow); cursor: pointer; border: none; background: none; font-size: 18px; padding: 0 5px; opacity: 0.5; transition: opacity 0.2s; }
         .btn-remove:hover { opacity: 1; }
+        
+        .btn-search-quote {
+            background-color: var(--venetian-lace); color: var(--fence-green); border: 1px solid var(--macadamia);
+            padding: 5px 10px; border-radius: 4px; font-size: 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-search-quote:hover { background-color: var(--macadamia); color: var(--fiery-glow); }
 
         /* =======================================================
            📱 DISEÑO RESPONSIVE (MÓVILES Y TABLETS)
@@ -440,64 +253,37 @@
         @media screen and (max-width: 768px) {
             body { padding: 10px; }
             .document-wrapper { padding: 15px; }
-            
             .doc-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .header-info { text-align: left; }
-            
             .info-grid { flex-direction: column; gap: 20px; }
             .info-block { width: 100%; }
-            
             .firmas-grid { flex-direction: column; gap: 30px; }
             .firma-box { width: 100%; }
-            
             .totals-table { width: 100%; margin-left: 0; }
-            
             .control-row { flex-direction: column; align-items: stretch; }
             .control-group-row { flex-direction: column; width: 100%; }
             .control-group { width: 100%; }
             .control-group input { width: 100% !important; }
             .control-group-row button { width: 100%; }
-            
             table { min-width: 500px; }
+            .quote-number { justify-content: flex-start; }
         }
 
         /* =======================================================
            🚀 PROTECCIÓN DE IMPRESIÓN NATIVA 
            ======================================================= */
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 20mm 15mm !important; 
-            }
-            body { 
-                display: block !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                background: white !important; 
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
+            @page { size: A4 portrait; margin: 20mm 15mm !important; }
+            body { display: block !important; margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             .control-panel { display: none !important; }
-            .document-wrapper { 
-                box-shadow: none !important; 
-                width: 100% !important; 
-                max-width: 100% !important;
-                margin: 0 !important; 
-                padding: 0 !important; 
-            }
-            .watermark-container {
-                position: fixed !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
-                z-index: -1 !important;
-            }
-            .action-row, .pdf-hide, .btn-remove { display: none !important; }
+            .document-wrapper { box-shadow: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .watermark-container { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: -1 !important; }
+            .action-row, .pdf-hide, .btn-remove, .btn-search-quote { display: none !important; }
             .editable { border: none !important; background: transparent !important; padding: 0 !important; }
             .objeto-textarea { border: none !important; background: transparent !important; overflow: visible !important; resize: none !important; }
-            
             .doc-header { flex-direction: row !important; align-items: center !important; }
             .header-info { text-align: right !important; }
+            .quote-number { justify-content: flex-end !important; }
             .info-grid { flex-direction: row !important; }
             .info-block { width: 48% !important; }
             .firmas-grid { flex-direction: row !important; }
@@ -505,11 +291,7 @@
             .totals-table { width: 350px !important; margin-left: auto !important; }
             .table-responsive-wrapper { overflow: visible !important; }
             table { min-width: 100% !important; }
-
-            tr, td, th, .info-block, .totals-table, .condiciones, .firma-box {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-            }
+            tr, td, th, .info-block, .totals-table, .condiciones, .firma-box { page-break-inside: avoid !important; break-inside: avoid !important; }
             h1, h2, h3, h4 { page-break-after: avoid !important; }
         }
     </style>
@@ -533,10 +315,11 @@
             </div>
             
             <div class="control-group-row" style="margin-left: auto;">
-                <button onclick="window.loginConGoogle ? window.loginConGoogle() : alert('⏳ Por favor, espera un momento mientras carga el sistema. Si el error persiste, verifica que no falten comillas en las credenciales de Firebase en el código.')" class="btn-google" id="btnLogin"><i class="fa-brands fa-google"></i> Acceder</button>
-                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Guardado Dual en Nube y Sheets"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube</button>
+                <button onclick="window.loginConGoogle ? window.loginConGoogle() : alert('⏳ Por favor, espera un momento...')" class="btn-google" id="btnLogin"><i class="fa-brands fa-google"></i> Acceder</button>
+                <button onclick="window.limpiarCotizacion()" class="btn-new" id="btnNew" style="display: none;" title="Crear cotización en blanco"><i class="fa-solid fa-file-circle-plus"></i> Nueva</button>
+                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Guardado Dual en Nube y Sheets"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar</button>
                 <button onclick="window.descargarBitacoraCloud()" class="btn-download" id="btnDownload" style="display: none;" title="Descargar CSV del Historial"><i class="fa-solid fa-file-csv"></i> Historial</button>
-                <button onclick="window.generarPDFNativo()" class="btn-accent" title="Generar PDF Oficial"><i class="fa-solid fa-file-pdf"></i> Generar PDF</button>
+                <button onclick="window.generarPDFNativo()" class="btn-accent" title="Generar PDF Oficial"><i class="fa-solid fa-file-pdf"></i> PDF</button>
             </div>
         </div>
         <div class="control-row">
@@ -583,7 +366,10 @@
             
             <div class="header-info">
                 <h1>COTIZACIÓN COMERCIAL</h1>
-                <div class="quote-number"># <span class="editable" contenteditable="true" id="numCotizacion">001</span></div>
+                <div class="quote-number">
+                    # <span class="editable" contenteditable="true" id="numCotizacion">001</span>
+                    <button onclick="window.buscarCotizacion()" class="btn-search-quote" id="btnSearch" style="display: none;" title="Buscar y editar esta cotización"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
                 <p><strong>Fecha de Emisión:</strong> <input type="date" id="fechaEmision" class="editable" style="font-family:inherit; color:inherit; border:none; background:transparent; font-size: 13px;"></p>
                 <p><strong>Vigencia:</strong> <span class="editable" contenteditable="true">30 días calendario</span></p>
             </div>
@@ -684,26 +470,24 @@
         </div>
     </div>
 
+    <!-- ==========================================================
+         🚀 LÓGICA CON FIREBASE Y GOOGLE SHEETS VIA FORM-IFRAME
+         ========================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // SE IMPORTAN LAS NUEVAS HERRAMIENTAS PARA BUSCAR Y EDITAR (query, where, updateDoc, doc)
+        import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ======================================================================
-        // ⚠️ 1. PEGA AQUÍ TUS CREDENCIALES DE FIREBASE (Asegúrate de NO BORRAR las comillas ni las comas finales)
-        // ======================================================================
         const firebaseConfig = {
-  apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
-  authDomain: "satori-bl-cotizador.firebaseapp.com",
-  projectId: "satori-bl-cotizador",
-  storageBucket: "satori-bl-cotizador.firebasestorage.app",
-  messagingSenderId: "671211767556",
-  appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
-};
+            apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
+            authDomain: "satori-bl-cotizador.firebaseapp.com",
+            projectId: "satori-bl-cotizador",
+            storageBucket: "satori-bl-cotizador.firebasestorage.app",
+            messagingSenderId: "671211767556",
+            appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
+        };
         
-        // ======================================================================
-        // ⚠️ 2. PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-        // ======================================================================
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzJns2_5cr9RRbxhZS1fka1gm6MGB7LKUedm41iD9glgBoMEye4WlQabdSBen3Rr4qMew/exec";
 
         let db, auth, currentUser;
@@ -720,19 +504,25 @@
                 const btnLogin = document.getElementById('btnLogin');
                 const btnSave = document.getElementById('btnSave');
                 const btnDownload = document.getElementById('btnDownload');
+                const btnSearch = document.getElementById('btnSearch');
+                const btnNew = document.getElementById('btnNew');
 
                 if (user) {
                     currentUser = user;
                     btnLogin.style.display = 'none';
                     btnSave.style.display = 'flex';
                     btnDownload.style.display = 'flex';
-                    window.mostrarMensaje(`Conectado a la Nube. Hola, ${user.displayName.split(' ')[0]}`, 'success');
+                    btnSearch.style.display = 'inline-block';
+                    btnNew.style.display = 'flex';
+                    window.mostrarMensaje(`Conectado. Hola, ${user.displayName.split(' ')[0]}`, 'success');
                     cargarConsecutivoCloud();
                 } else {
                     currentUser = null;
                     btnLogin.style.display = 'flex';
                     btnSave.style.display = 'none';
                     btnDownload.style.display = 'none';
+                    btnSearch.style.display = 'none';
+                    btnNew.style.display = 'none';
                 }
             });
         } catch (e) {
@@ -748,17 +538,12 @@
         }
 
         window.loginConGoogle = function() {
-            if (!isFirebaseActive) {
-                alert("⏳ Conectando con los servidores seguros. Intenta de nuevo en 2 segundos...");
-                return;
-            }
-            
+            if (!isFirebaseActive) { alert("⏳ Conectando... Intenta en 2 segundos."); return; }
             signInWithPopup(auth, provider).catch((error) => {
-                console.error("Error al autenticar:", error);
                 if (error.code === 'auth/popup-blocked') {
-                    alert("⚠️ ALERTA: Tu celular o navegador está bloqueando la ventana emergente de Google. Por favor, asegúrate de permitir las ventanas emergentes (pop-ups) para este sitio.");
+                    alert("⚠️ ALERTA: Tu navegador bloqueó la ventana de Google. Por favor, permite las ventanas emergentes.");
                 } else {
-                    alert("❌ Error al iniciar sesión: " + error.message);
+                    alert("❌ Error: " + error.message);
                 }
             });
         }
@@ -771,32 +556,114 @@
                 if (result && result.nextConsecutivo) {
                     document.getElementById('numCotizacion').innerText = result.nextConsecutivo;
                 }
+            } catch (e) { console.error("Error cargando consecutivo:", e); }
+        }
+
+        // --- NUEVA FUNCIÓN: LIMPIAR PARA COTIZACIÓN NUEVA ---
+        window.limpiarCotizacion = function() {
+            document.getElementById('fechaEmision').valueAsDate = new Date();
+            document.getElementById('clienteNombre').innerText = "Nombre Empresa S.A.S";
+            document.getElementById('clienteNit').innerText = "800.123.456-7";
+            document.getElementById('clienteContacto').innerText = "Nombre del Contacto";
+            document.getElementById('clienteEmail').innerText = "cliente@empresa.com";
+            document.getElementById('objetoEstrategico').value = "Propuesta formal para el diseño de identidad corporativa integral y desarrollo estratégico de marca.";
+            
+            document.getElementById('itemsBody').innerHTML = `
+                <tr>
+                    <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">1</span></td>
+                    <td class="col-desc">
+                        <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">Nuevo Servicio</span></strong>
+                        <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Descripción del servicio.</span>
+                    </td>
+                    <td class="col-unit">$ <span class="editable item-unit" contenteditable="true" oninput="window.calcularTotales()">0</span></td>
+                    <td class="col-total item-total">$ 0</td>
+                    <td class="pdf-hide"><button class="btn-remove" onclick="window.eliminarFila(this)"><i class="fa-solid fa-trash-can"></i></button></td>
+                </tr>
+            `;
+            window.calcularTotales();
+            cargarConsecutivoCloud();
+            window.mostrarMensaje('📄 Formulario en blanco listo.', 'success');
+        }
+
+        // --- NUEVA FUNCIÓN: BUSCAR COTIZACIÓN EXISTENTE ---
+        window.buscarCotizacion = async function() {
+            if (!isFirebaseActive || !currentUser) return;
+            const numBuscar = document.getElementById('numCotizacion').innerText.trim();
+            window.mostrarMensaje(`Buscando cotización #${numBuscar}...`, 'success');
+            
+            try {
+                const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
+                const q = query(colRef, where("consecutivo", "==", numBuscar));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    window.mostrarMensaje(`⚠️ La cotización #${numBuscar} no existe en la nube.`, 'error');
+                    return;
+                }
+
+                // Cargar datos al formulario
+                const data = snapshot.docs[0].data();
+                if(data.fecha) document.getElementById('fechaEmision').value = data.fecha;
+                if(data.cliente) document.getElementById('clienteNombre').innerText = data.cliente;
+                if(data.nit) document.getElementById('clienteNit').innerText = data.nit;
+                if(data.contacto) document.getElementById('clienteContacto').innerText = data.contacto;
+                if(data.email) document.getElementById('clienteEmail').innerText = data.email;
+                if(data.objeto) document.getElementById('objetoEstrategico').value = data.objeto;
+
+                // Reconstruir la tabla de servicios
+                if (data.rawItemsData) {
+                    const items = JSON.parse(data.rawItemsData);
+                    const tbody = document.getElementById('itemsBody');
+                    tbody.innerHTML = '';
+                    items.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">${item.cant}</span></td>
+                            <td class="col-desc">
+                                <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">${item.titulo}</span></strong>
+                                <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">${item.detalle}</span>
+                            </td>
+                            <td class="col-unit">$ <span class="editable item-unit" contenteditable="true" oninput="window.calcularTotales()">${item.unit}</span></td>
+                            <td class="col-total item-total">${item.totalFila}</td>
+                            <td class="pdf-hide"><button class="btn-remove" onclick="window.eliminarFila(this)"><i class="fa-solid fa-trash-can"></i></button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+                window.calcularTotales();
+                window.mostrarMensaje(`✅ Cotización #${numBuscar} cargada para edición.`, 'success');
             } catch (e) {
-                console.error("Error cargando consecutivo desde Sheets:", e);
+                console.error("Error buscando:", e);
+                window.mostrarMensaje('❌ Error al buscar en Firebase.', 'error');
             }
         }
 
+        // --- FUNCIÓN ACTUALIZADA: GUARDAR O SOBRESCRIBIR ---
         window.guardarRegistroCloud = async function() {
-            if (!isFirebaseActive || !currentUser) {
-                window.mostrarMensaje('⚠️ Debes iniciar sesión con Google primero.', 'error');
-                return;
-            }
+            if (!isFirebaseActive || !currentUser) { window.mostrarMensaje('⚠️ Inicia sesión primero.', 'error'); return; }
 
             const btn = document.getElementById('btnSave');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
             btn.disabled = true;
 
             let resumenItems = "";
+            let rawItems = []; // Se guardan los datos puros para poder reconstruir la tabla al "Buscar"
+            
             document.querySelectorAll('#itemsBody tr').forEach(fila => {
                 const cant = fila.querySelector('.item-cant').innerText.trim();
                 const titulo = fila.querySelector('.item-titulo').innerText.trim();
+                const detalle = fila.querySelector('.item-detalle').innerText.trim();
+                let unit = fila.querySelector('.item-unit').innerText.replace('$', '').trim();
                 const totalFila = fila.querySelector('.item-total').innerText.trim();
+
                 resumenItems += `[${cant}x ${titulo} = ${totalFila}] `;
+                rawItems.push({ cant, titulo, detalle, unit, totalFila });
             });
 
+            const currentConsecutivo = document.getElementById('numCotizacion').innerText.trim();
             const payload = {
                 action: "save",
-                consecutivo: document.getElementById('numCotizacion').innerText.trim(),
+                consecutivo: currentConsecutivo,
                 fecha: document.getElementById('fechaEmision').value,
                 cliente: document.getElementById('clienteNombre').innerText.trim(),
                 nit: document.getElementById('clienteNit').innerText.trim(),
@@ -804,6 +671,7 @@
                 email: document.getElementById('clienteEmail').innerText.trim(),
                 objeto: document.getElementById('objetoEstrategico').value.trim(),
                 itemsDetalle: resumenItems.trim(),
+                rawItemsData: JSON.stringify(rawItems), // Vital para la función de editar
                 subtotal: window.valorSubtotalReal || 0,
                 iva: window.valorIvaReal || 0,
                 total: window.valorTotalReal || 0,
@@ -811,18 +679,28 @@
             };
 
             try {
+                // 1. SOBRESCRIBIR O CREAR EN FIREBASE (UPSERT)
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
-                await addDoc(colRef, payload);
+                const q = query(colRef, where("consecutivo", "==", currentConsecutivo));
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    // Ya existe: Actualizamos el documento
+                    const docId = snapshot.docs[0].id;
+                    await updateDoc(doc(db, 'usuarios', currentUser.uid, 'cotizaciones', docId), payload);
+                } else {
+                    // No existe: Lo creamos
+                    await addDoc(colRef, payload);
+                }
                 
+                // 2. ENVIAR A SHEETS (El Apps Script ahora sabe si debe actualizar o crear fila)
                 const form = document.getElementById('sheetForm');
                 const iframe = document.getElementById('sheetIframe');
                 
                 form.innerHTML = '';
                 Object.keys(payload).forEach(key => {
                     const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = key;
-                    input.value = String(payload[key]);
+                    input.type = 'hidden'; input.name = key; input.value = String(payload[key]);
                     form.appendChild(input);
                 });
                 
@@ -830,18 +708,13 @@
                 form.action = GOOGLE_SHEETS_URL;
                 form.submit();
                 
-                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente y enviada a Sheets!', 'success');
-                
-                const currentNum = parseInt(payload.consecutivo, 10);
-                if (!isNaN(currentNum)) {
-                    document.getElementById('numCotizacion').innerText = ("000" + (currentNum + 1)).slice(-3);
-                }
+                window.mostrarMensaje('☁️ ¡Cotización guardada/actualizada exitosamente!', 'success');
                 
             } catch (e) {
                 console.error("Error guardando:", e);
                 window.mostrarMensaje('❌ Error al guardar en Firebase.', 'error');
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube';
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar';
                 btn.disabled = false;
             }
         }
@@ -854,10 +727,7 @@
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
                 const snapshot = await getDocs(colRef);
                 
-                if(snapshot.empty) {
-                    window.mostrarMensaje('⚠️ No hay cotizaciones guardadas aún.', 'error');
-                    return;
-                }
+                if(snapshot.empty) { window.mostrarMensaje('⚠️ No hay cotizaciones guardadas aún.', 'error'); return; }
 
                 let historial = [];
                 snapshot.forEach(doc => { historial.push(doc.data()); });
@@ -869,10 +739,8 @@
                 historial.forEach(row => {
                     let rowData = [
                         row.consecutivo, row.fecha,
-                        `"${(row.cliente || '').replace(/"/g, '""')}"`,
-                        `"${(row.nit || '').replace(/"/g, '""')}"`,
-                        `"${(row.contacto || '').replace(/"/g, '""')}"`,
-                        `"${(row.email || '').replace(/"/g, '""')}"`,
+                        `"${(row.cliente || '').replace(/"/g, '""')}"`, `"${(row.nit || '').replace(/"/g, '""')}"`,
+                        `"${(row.contacto || '').replace(/"/g, '""')}"`, `"${(row.email || '').replace(/"/g, '""')}"`,
                         `"${(row.objeto || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
                         `"${(row.itemsDetalle || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
                         row.subtotal, row.iva, row.total
@@ -884,15 +752,11 @@
                 const link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
                 link.setAttribute("download", "Historial_Cotizaciones_SATORI.csv");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } catch (e) {
-                console.error("Error descargando:", e);
-                window.mostrarMensaje('❌ Error al descargar el historial.', 'error');
-            }
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            } catch (e) { window.mostrarMensaje('❌ Error al descargar el historial.', 'error'); }
         }
 
+        // --- FUNCIONES DE UI ---
         window.autoResize = function(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
@@ -906,10 +770,7 @@
                     const image = document.getElementById('docLogo');
                     const defaultSvg = document.getElementById('defaultSvg');
                     const texto = document.getElementById('logoTexto');
-                    image.src = e.target.result; 
-                    image.style.display = 'block';
-                    defaultSvg.style.display = 'none';
-                    texto.style.display = 'none';
+                    image.src = e.target.result; image.style.display = 'block'; defaultSvg.style.display = 'none'; texto.style.display = 'none';
                 }
                 reader.readAsDataURL(file);
             }
@@ -922,9 +783,7 @@
                 reader.onload = function(e) {
                     const customImg = document.getElementById('customWatermark');
                     const defaultSvg = document.getElementById('defaultWatermark');
-                    customImg.src = e.target.result; 
-                    customImg.style.display = 'block';
-                    defaultSvg.style.display = 'none';
+                    customImg.src = e.target.result; customImg.style.display = 'block'; defaultSvg.style.display = 'none';
                 }
                 reader.readAsDataURL(file);
             }
@@ -939,7 +798,7 @@
                 <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">1</span></td>
                 <td class="col-desc">
                     <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">Nuevo Servicio</span></strong>
-                    <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Descripción detallada del servicio o entregable.</span>
+                    <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Descripción detallada del servicio.</span>
                 </td>
                 <td class="col-unit">$ <span class="editable item-unit" contenteditable="true" oninput="window.calcularTotales()">0</span></td>
                 <td class="col-total item-total">$ 0</td>
@@ -949,11 +808,7 @@
             window.calcularTotales();
         }
 
-        window.eliminarFila = function(btn) {
-            btn.closest('tr').remove();
-            window.calcularTotales();
-        }
-
+        window.eliminarFila = function(btn) { btn.closest('tr').remove(); window.calcularTotales(); }
         function limpiarNumero(str) { return parseFloat(str.replace(/[^0-9.-]+/g,"")) || 0; }
 
         window.valorSubtotalReal = 0; window.valorIvaReal = 0; window.valorTotalReal = 0;
@@ -999,10 +854,7 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
-        window.generarPDFNativo = function() {
-            window.autoResize(document.getElementById('objetoEstrategico'));
-            window.print();
-        }
+        window.generarPDFNativo = function() { window.autoResize(document.getElementById('objetoEstrategico')); window.print(); }
 
         document.getElementById('fechaEmision').valueAsDate = new Date();
         window.autoResize(document.getElementById('objetoEstrategico'));
