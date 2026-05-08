@@ -588,7 +588,16 @@
         // --- NUEVA FUNCIÓN: BUSCAR COTIZACIÓN EXISTENTE ---
         window.buscarCotizacion = async function() {
             if (!isFirebaseActive || !currentUser) return;
-            const numBuscar = document.getElementById('numCotizacion').innerText.trim();
+            
+            // Forzar formato a 3 dígitos automáticamente (ej. si escriben "1" o " 1 " busca "001")
+            let numRaw = document.getElementById('numCotizacion').innerText.replace(/\D/g, '').trim();
+            if(!numRaw) {
+                window.mostrarMensaje('⚠️ Escribe un número válido.', 'error');
+                return;
+            }
+            const numBuscar = ("000" + parseInt(numRaw, 10)).slice(-3);
+            document.getElementById('numCotizacion').innerText = numBuscar;
+
             window.mostrarMensaje(`Buscando cotización #${numBuscar}...`, 'success');
             
             try {
@@ -610,11 +619,21 @@
                 if(data.email) document.getElementById('clienteEmail').innerText = data.email;
                 if(data.objeto) document.getElementById('objetoEstrategico').value = data.objeto;
 
+                // Recuperar y recalcular el porcentaje de IVA guardado
+                if(data.iva !== undefined && data.subtotal && data.subtotal > 0) {
+                    let porcentajeIva = Math.round((data.iva / data.subtotal) * 100);
+                    document.getElementById('ivaPorcentaje').innerText = porcentajeIva;
+                } else {
+                    document.getElementById('ivaPorcentaje').innerText = "0";
+                }
+
                 // Reconstruir la tabla de servicios
+                const tbody = document.getElementById('itemsBody');
+                tbody.innerHTML = '';
+
                 if (data.rawItemsData) {
+                    // Cotizaciones NUEVAS (con memoria exacta)
                     const items = JSON.parse(data.rawItemsData);
-                    const tbody = document.getElementById('itemsBody');
-                    tbody.innerHTML = '';
                     items.forEach(item => {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
@@ -629,7 +648,40 @@
                         `;
                         tbody.appendChild(tr);
                     });
+                } else if (data.itemsDetalle) {
+                    // FALLBACK: Cotizaciones ANTIGUAS (001 y 002) que se guardaron como texto plano
+                    const regex = /\[(.*?)x (.*?) = (.*?)\]/g;
+                    let match;
+                    let found = false;
+                    while ((match = regex.exec(data.itemsDetalle)) !== null) {
+                        found = true;
+                        const cant = match[1].trim();
+                        const titulo = match[2].trim();
+                        const totalFila = match[3].trim();
+                        
+                        // Recalcular valor unitario aproximado para cotizaciones viejas
+                        const totalNum = limpiarNumero(totalFila);
+                        const cantNum = parseFloat(cant) || 1;
+                        const unitNum = totalNum / cantNum;
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">${cant}</span></td>
+                            <td class="col-desc">
+                                <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">${titulo}</span></strong>
+                                <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Servicio recuperado del historial antiguo.</span>
+                            </td>
+                            <td class="col-unit">$ <span class="editable item-unit" contenteditable="true" oninput="window.calcularTotales()">${formateador.format(unitNum)}</span></td>
+                            <td class="col-total item-total">${totalFila}</td>
+                            <td class="pdf-hide"><button class="btn-remove" onclick="window.eliminarFila(this)"><i class="fa-solid fa-trash-can"></i></button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
+                    if (!found) window.agregarFila(); // Si falla la lectura, poner fila vacía
+                } else {
+                    window.agregarFila(); // Si no hay nada, poner fila vacía
                 }
+                
                 window.calcularTotales();
                 window.mostrarMensaje(`✅ Cotización #${numBuscar} cargada para edición.`, 'success');
             } catch (e) {
