@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SATORI Business LAB - Cotizador Cloud</title>
+    <title>SATORI Business LAB - Cotizador Oficial</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +15,7 @@
         * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            box-sizing: border-box;
         }
 
         :root {
@@ -58,7 +59,6 @@
             flex-direction: column;
             gap: 15px;
             border-top: 4px solid var(--fiery-glow);
-            box-sizing: border-box;
         }
         
         .control-row {
@@ -131,7 +131,7 @@
         .status-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .status-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-        /* --- DOCUMENTO --- */
+        /* --- DOCUMENTO EN PANTALLA --- */
         .document-wrapper {
             background: #ffffff;
             width: 210mm; 
@@ -139,7 +139,6 @@
             padding: 20mm; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             position: relative;
-            box-sizing: border-box;
         }
 
         .watermark-container {
@@ -294,7 +293,6 @@
             color: var(--fence-green);
             line-height: 1.5;
             background: transparent;
-            box-sizing: border-box;
             border: none;
             resize: none;
             overflow: hidden;
@@ -413,12 +411,14 @@
         .btn-remove:hover { opacity: 1; }
 
         /* =======================================================
-           🚀 BLINDAJE DE IMPRESIÓN (NATIVO DEL NAVEGADOR)
+           🚀 BLINDAJE DE IMPRESIÓN PDF MULTIPÁGINA
+           Se recuperan los márgenes nativos para proteger la Pag 2+
            ======================================================= */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0 !important; 
+                /* REGLA VITAL: Estos son los márgenes físicos para TODAS las páginas */
+                margin: 20mm 15mm !important; 
             }
             body { 
                 display: block !important; 
@@ -434,11 +434,14 @@
                 width: 100% !important; 
                 max-width: 100% !important;
                 margin: 0 !important; 
-                padding: 15mm 20mm !important;
+                /* Ya no usamos padding aquí, el @page se encarga de separar el borde en cada hoja */
+                padding: 0 !important; 
                 overflow: visible !important;
                 height: auto !important;
                 min-height: 0 !important;
             }
+            
+            /* CRÍTICO PARA MÚLTIPLES PÁGINAS: El position fixed se repite en cada página impresa */
             .watermark-container {
                 position: fixed !important;
                 top: 50% !important;
@@ -446,6 +449,7 @@
                 transform: translate(-50%, -50%) !important;
                 z-index: -1 !important;
             }
+
             .action-row, .pdf-hide, .btn-remove {
                 display: none !important;
             }
@@ -458,9 +462,12 @@
                 height: auto !important;
                 overflow: visible !important;
             }
-            tr, .info-grid, .totals-wrapper, .condiciones, .firmas-grid, .objeto-section {
+            /* Evita que un elemento se corte a la mitad del salto de página */
+            tr, td, th, .info-grid, .totals-wrapper, .condiciones, .firmas-grid, .objeto-section {
                 page-break-inside: avoid !important;
-                break-inside: avoid !important;
+            }
+            h1, h2, h3, h4 {
+                page-break-after: avoid !important;
             }
         }
     </style>
@@ -482,15 +489,10 @@
             </div>
             
             <div class="control-group-row" style="margin-left: auto;">
-                
-                <!-- Botón de Login (Visible si no está autenticado) -->
                 <button onclick="window.loginConGoogle()" class="btn-google" id="btnLogin"><i class="fa-brands fa-google"></i> Acceder</button>
-                
-                <!-- Botones de Nube (Ocultos hasta autenticar) -->
-                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Guardar en la Nube (Firebase)"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube</button>
-                <button onclick="window.descargarBitacoraCloud()" class="btn-download" id="btnDownload" style="display: none;" title="Descargar CSV del Historial Cloud"><i class="fa-solid fa-file-csv"></i> Descargar Historial</button>
-                
-                <button onclick="window.generarPDFNativo()" class="btn-accent" title="Abre el asistente de impresión para guardar como PDF"><i class="fa-solid fa-file-pdf"></i> Generar PDF Oficial</button>
+                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Sincronización Dual (Nube + Sheets)"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube</button>
+                <button onclick="window.descargarBitacoraCloud()" class="btn-download" id="btnDownload" style="display: none;" title="Descargar CSV del Historial"><i class="fa-solid fa-file-csv"></i> Historial</button>
+                <button onclick="window.generarPDFNativo()" class="btn-accent" title="Generar PDF Oficial"><i class="fa-solid fa-file-pdf"></i> Generar PDF</button>
             </div>
         </div>
         
@@ -639,16 +641,14 @@
     </div>
 
     <!-- ==========================================================
-         🚀 LÓGICA DE APLICACIÓN CON FIREBASE CLOUD (GOOGLE AUTH)
+         🚀 LÓGICA CON FIREBASE Y GOOGLE SHEETS
          ========================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ======================================================================
-        // ✅ TUS CREDENCIALES INYECTADAS
-        // ======================================================================
+        // CREDENCIALES FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
             authDomain: "satori-bl-cotizador.firebaseapp.com",
@@ -657,6 +657,9 @@
             messagingSenderId: "671211767556",
             appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
         };
+        
+        // URL DE TU GOOGLE SHEETS
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxWOkjit1hliGAdvva0w6w1-7GysTcdChrLr382DlGvleUyko_W6lSAaNWdKPbFJPi1rg/exec";
 
         let db, auth, currentUser;
         let isFirebaseActive = false;
@@ -668,7 +671,6 @@
             db = getFirestore(app);
             isFirebaseActive = true;
 
-            // Rastreador de estado de sesión
             onAuthStateChanged(auth, (user) => {
                 const btnLogin = document.getElementById('btnLogin');
                 const btnSave = document.getElementById('btnSave');
@@ -676,16 +678,13 @@
 
                 if (user) {
                     currentUser = user;
-                    // Mostrar herramientas de la nube
                     btnLogin.style.display = 'none';
                     btnSave.style.display = 'flex';
                     btnDownload.style.display = 'flex';
-                    
-                    window.mostrarMensaje(`Hola, ${user.displayName.split(' ')[0]}`, 'success');
+                    window.mostrarMensaje(`Conectado. Hola, ${user.displayName.split(' ')[0]}`, 'success');
                     cargarConsecutivoCloud();
                 } else {
                     currentUser = null;
-                    // Ocultar herramientas, mostrar botón de Login
                     btnLogin.style.display = 'flex';
                     btnSave.style.display = 'none';
                     btnDownload.style.display = 'none';
@@ -703,10 +702,8 @@
             setTimeout(() => { msgBox.style.display = 'none'; }, 6000);
         }
 
-        // --- SISTEMA DE LOGIN CON GOOGLE ---
         window.loginConGoogle = function() {
             if (!isFirebaseActive) return;
-            
             signInWithPopup(auth, provider).catch((error) => {
                 console.error("Error al autenticar:", error);
                 window.mostrarMensaje('❌ No se pudo iniciar sesión.', 'error');
@@ -716,23 +713,18 @@
         async function cargarConsecutivoCloud() {
             if (!currentUser || !db) return;
             try {
-                // Guarda en una colección ligada al ID único de tu cuenta de Google
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
                 const snapshot = await getDocs(colRef);
                 
                 let maxConsecutivo = 0;
                 snapshot.forEach(doc => {
                     const num = parseInt(doc.data().consecutivo, 10);
-                    if (!isNaN(num) && num > maxConsecutivo) {
-                        maxConsecutivo = num;
-                    }
+                    if (!isNaN(num) && num > maxConsecutivo) { maxConsecutivo = num; }
                 });
                 
                 const nextNumber = ("000" + (maxConsecutivo + 1)).slice(-3);
                 document.getElementById('numCotizacion').innerText = nextNumber;
-            } catch (e) {
-                console.error("Error cargando consecutivo:", e);
-            }
+            } catch (e) { console.error("Error cargando consecutivo:", e); }
         }
 
         window.guardarRegistroCloud = async function() {
@@ -769,10 +761,20 @@
             };
 
             try {
+                // 1. Guardar en Firebase (Para el app web)
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
                 await addDoc(colRef, payload);
                 
-                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente en tu Firebase!', 'success');
+                // 2. Enviar silenciosamente a Google Sheets en segundo plano
+                const params = new URLSearchParams(payload);
+                fetch(GOOGLE_SHEETS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                }).catch(e => console.log("Google Sheets background sync failed (no afecta a Firebase)", e));
+
+                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente!', 'success');
                 
                 const currentNum = parseInt(payload.consecutivo, 10);
                 if (!isNaN(currentNum)) {
@@ -780,7 +782,7 @@
                 }
             } catch (e) {
                 console.error("Error guardando:", e);
-                window.mostrarMensaje('❌ Error al guardar. Revisa la consola y las reglas de Firestore.', 'error');
+                window.mostrarMensaje('❌ Error al guardar en Firebase.', 'error');
             } finally {
                 btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube';
                 btn.disabled = false;
@@ -789,7 +791,6 @@
 
         window.descargarBitacoraCloud = async function() {
             if (!isFirebaseActive || !currentUser) return;
-            
             window.mostrarMensaje('⏳ Descargando historial...', 'success');
 
             try {
@@ -944,6 +945,7 @@
 
         window.generarPDFNativo = function() {
             window.autoResize(document.getElementById('objetoEstrategico'));
+            // Usamos impresión nativa. Asegúrate de habilitar "Gráficos de fondo" en la ventana de impresión.
             window.print();
         }
 
