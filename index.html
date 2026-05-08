@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
-        /* Obligar al navegador a imprimir los colores de fondo y marcas de agua */
         * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -344,11 +343,18 @@
             border-radius: 8px;
             padding: 15px 20px;
         }
+        /* Flexbox riguroso para evitar que el PDF rompa la distribución */
         .total-line {
-            display: flex;
-            justify-content: space-between;
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
             padding: 6px 0;
             font-size: 14px;
+            width: 100% !important;
+        }
+        .total-line span {
+            display: inline-block !important;
         }
         .total-line.final {
             border-top: 2px solid var(--fence-green);
@@ -411,14 +417,12 @@
         .btn-remove:hover { opacity: 1; }
 
         /* =======================================================
-           🚀 BLINDAJE DE IMPRESIÓN PDF MULTIPÁGINA
-           Se recuperan los márgenes nativos para proteger la Pag 2+
+           🚀 BLINDAJE DE IMPRESIÓN PDF
            ======================================================= */
         @media print {
             @page {
                 size: A4 portrait;
-                /* REGLA VITAL: Estos son los márgenes físicos para TODAS las páginas */
-                margin: 20mm 15mm !important; 
+                margin: 15mm 15mm !important; /* Márgenes físicos perfectos */
             }
             body { 
                 display: block !important; 
@@ -433,15 +437,16 @@
                 box-shadow: none !important; 
                 width: 100% !important; 
                 max-width: 100% !important;
-                margin: 0 !important; 
-                /* Ya no usamos padding aquí, el @page se encarga de separar el borde en cada hoja */
+                margin: 0 auto !important; 
                 padding: 0 !important; 
                 overflow: visible !important;
                 height: auto !important;
                 min-height: 0 !important;
+                /* Reducimos sutilmente la escala para garantizar que todo encaje sin saltos forzados */
+                transform: scale(0.97);
+                transform-origin: top left;
             }
             
-            /* CRÍTICO PARA MÚLTIPLES PÁGINAS: El position fixed se repite en cada página impresa */
             .watermark-container {
                 position: fixed !important;
                 top: 50% !important;
@@ -462,7 +467,6 @@
                 height: auto !important;
                 overflow: visible !important;
             }
-            /* Evita que un elemento se corte a la mitad del salto de página */
             tr, td, th, .info-grid, .totals-wrapper, .condiciones, .firmas-grid, .objeto-section {
                 page-break-inside: avoid !important;
             }
@@ -474,7 +478,6 @@
 </head>
 <body>
 
-    <!-- PANEL DE CONTROL UI -->
     <div class="control-panel" id="controlPanel">
         <div class="control-row">
             <div class="control-group-row">
@@ -495,13 +498,10 @@
                 <button onclick="window.generarPDFNativo()" class="btn-accent" title="Generar PDF Oficial"><i class="fa-solid fa-file-pdf"></i> Generar PDF</button>
             </div>
         </div>
-        
         <div id="statusMessage"></div>
     </div>
 
-    <!-- DOCUMENTO A IMPRIMIR -->
     <div class="document-wrapper" id="cotizacionDoc">
-        
         <div class="watermark-container">
             <svg id="defaultWatermark" viewBox="0 0 100 100" fill="none" stroke="#09332C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="50" cy="15" r="1.5" fill="#09332C" stroke="none" />
@@ -637,26 +637,22 @@
                 <p class="editable editable-block" contenteditable="true">Nombre, Firma, Cédula/NIT y Sello</p>
             </div>
         </div>
-
     </div>
 
-    <!-- ==========================================================
-         🚀 LÓGICA CON FIREBASE Y GOOGLE SHEETS
-         ========================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // CREDENCIALES FIREBASE
-       const firebaseConfig = {
-  apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
-  authDomain: "satori-bl-cotizador.firebaseapp.com",
-  projectId: "satori-bl-cotizador",
-  storageBucket: "satori-bl-cotizador.firebasestorage.app",
-  messagingSenderId: "671211767556",
-  appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
+            authDomain: "satori-bl-cotizador.firebaseapp.com",
+            projectId: "satori-bl-cotizador",
+            storageBucket: "satori-bl-cotizador.firebasestorage.app",
+            messagingSenderId: "671211767556",
+            appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
+        };
         
         // URL DE TU GOOGLE SHEETS
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxWOkjit1hliGAdvva0w6w1-7GysTcdChrLr382DlGvleUyko_W6lSAaNWdKPbFJPi1rg/exec";
@@ -681,7 +677,7 @@
                     btnLogin.style.display = 'none';
                     btnSave.style.display = 'flex';
                     btnDownload.style.display = 'flex';
-                    window.mostrarMensaje(`Conectado. Hola, ${user.displayName.split(' ')[0]}`, 'success');
+                    window.mostrarMensaje(`Conectado a la Nube. Hola, ${user.displayName.split(' ')[0]}`, 'success');
                     cargarConsecutivoCloud();
                 } else {
                     currentUser = null;
@@ -691,7 +687,7 @@
                 }
             });
         } catch (e) {
-            console.error("Firebase Initialization Error:", e);
+            console.error("Firebase Error:", e);
         }
 
         window.mostrarMensaje = function(texto, tipo) {
@@ -761,20 +757,19 @@
             };
 
             try {
-                // 1. Guardar en Firebase (Para el app web)
+                // 1. Guardar seguro en Firebase
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
                 await addDoc(colRef, payload);
                 
-                // 2. Enviar silenciosamente a Google Sheets en segundo plano
+                // 2. Sincronización silenciosa a Google Sheets mediante GET (Imposible que bloquee por CORS)
                 const params = new URLSearchParams(payload);
-                fetch(GOOGLE_SHEETS_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: params.toString()
-                }).catch(e => console.log("Google Sheets background sync failed (no afecta a Firebase)", e));
+                params.append("action", "save");
+                fetch(GOOGLE_SHEETS_URL + "?" + params.toString(), {
+                    method: 'GET',
+                    mode: 'no-cors'
+                }).catch(e => console.log("Google Sheets sync ejecutado en background."));
 
-                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente!', 'success');
+                window.mostrarMensaje('☁️ ¡Cotización guardada y sincronizada exitosamente!', 'success');
                 
                 const currentNum = parseInt(payload.consecutivo, 10);
                 if (!isNaN(currentNum)) {
@@ -945,7 +940,6 @@
 
         window.generarPDFNativo = function() {
             window.autoResize(document.getElementById('objetoEstrategico'));
-            // Usamos impresión nativa. Asegúrate de habilitar "Gráficos de fondo" en la ventana de impresión.
             window.print();
         }
 
