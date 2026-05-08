@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SATORI Business LAB - Cotizador Cloud</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Obligar al navegador a imprimir los colores de fondo y marcas de agua */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        :root {
+            --fence-green: #09332C;      
+            --norfolk-green: #2E4B3C;    
+            --venetian-lace: #F7EDDA;    
+            --fiery-glow: #F0531C;       
+            --pumpkin-vapor: #FFA74F;    
+            --macadamia: #F7DFBA;        
+            
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--fence-green);
+            background-color: #e5e7eb; 
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: auto; 
+        }
+
+        h1, h2, h3, h4, th, .bold {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            color: var(--fence-green);
+        }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(9, 51, 44, 0.1);
+            margin-bottom: 30px;
+            width: 210mm; 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-top: 4px solid var(--fiery-glow);
+            box-sizing: border-box;
+        }
+        
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .control-group-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--fence-green);
+            color: var(--venetian-lace);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-heading);
+            font-weight: 500;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:hover { background-color: var(--norfolk-green); }
+        button.btn-accent { background-color: var(--fiery-glow); color: white; height: 35px; }
+        button.btn-accent:hover { background-color: var(--pumpkin-vapor); color: var(--fence-green); }
+        button.btn-save { background-color: #2563eb; color: white; height: 35px; } 
+        button.btn-save:hover { background-color: #1d4ed8; }
+        button.btn-download { background-color: #16a34a; color: white; height: 35px; } 
+        button.btn-download:hover { background-color: #15803d; }
+        button.btn-google { background-color: #4285F4; color: white; height: 35px; }
+        button.btn-google:hover { background-color: #3367d6; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        input[type="text"], input[type="file"], input[type="date"], textarea {
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            color: var(--fence-green);
+            background-color: #f8fafc;
+            font-size: 13px;
+        }
+
+        #statusMessage {
+            display: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .status-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        /* --- DOCUMENTO --- */
+        .document-wrapper {
+            background: #ffffff;
+            width: 210mm; 
+            min-height: 297mm; 
+            padding: 20mm; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .watermark-container {
+            position: absolute;
+            top: 45%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 450px;
+            pointer-events: none;
+            z-index: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .watermark-container svg, 
+        .watermark-container img {
+            width: 100%;
+            height: auto;
+            opacity: 0.04;
+            mix-blend-mode: multiply; 
+        }
+
+        .editable {
+            border: 1px dashed transparent;
+            padding: 2px 5px;
+            transition: all 0.2s;
+            outline: none;
+            display: inline-block;
+            min-width: 30px;
+            border-radius: 3px;
+        }
+        .editable:hover, .editable:focus {
+            background-color: var(--venetian-lace);
+            border-color: var(--macadamia);
+        }
+        .editable-block {
+            display: block;
+            width: 100%;
+        }
+
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+            border-bottom: 2px solid var(--fence-green);
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-container {
+            width: 280px; 
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; 
+        }
+        
+        .logo-container img {
+            width: 100%; 
+            max-width: 280px; 
+            height: auto;
+            object-fit: contain;
+            object-position: left center;
+            mix-blend-mode: multiply; 
+            display: block;
+            margin-bottom: -15px; 
+        }
+        
+        .default-logo-svg {
+            width: 150px; 
+            height: auto;
+            margin-bottom: 5px; 
+            display: block;
+        }
+
+        .header-info {
+            text-align: right;
+            margin-top: 0;
+        }
+        .header-info h1 {
+            font-size: 16px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 0 0 10px 0;
+            color: var(--norfolk-green);
+            line-height: 1; 
+        }
+        .quote-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--fiery-glow);
+            margin: 0 0 5px 0;
+            font-family: var(--font-heading);
+            line-height: 1;
+        }
+        .header-info p {
+            margin: 3px 0;
+            font-size: 13px;
+            color: var(--fence-green);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px; 
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        .info-block {
+            background-color: transparent; 
+            padding: 0; 
+            border: none; 
+        }
+        .info-block h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 13px; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--fence-green); 
+            border-bottom: 1px solid var(--macadamia); 
+            padding-bottom: 5px;
+        }
+        .info-block p {
+            margin: 6px 0;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .info-block strong {
+            font-weight: 600;
+            font-family: var(--font-heading);
+        }
+
+        .objeto-section {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        .objeto-section h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--fence-green);
+        }
+        .objeto-textarea {
+            width: 100%;
+            min-height: 40px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--fence-green);
+            line-height: 1.5;
+            background: transparent;
+            box-sizing: border-box;
+            border: none;
+            resize: none;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 13px;
+            position: relative;
+            z-index: 1;
+        }
+        th {
+            background-color: var(--venetian-lace);
+            color: var(--fence-green);
+            padding: 10px 10px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--fence-green);
+        }
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        .col-cant { width: 8%; text-align: center; }
+        .col-desc { width: 47%; }
+        .col-unit { width: 20%; text-align: right; }
+        .col-total { width: 25%; text-align: right; font-weight: 500; }
+        
+        .action-row {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .totals-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .totals-box {
+            width: 350px;
+            background-color: var(--venetian-lace);
+            border-radius: 8px;
+            padding: 15px 20px;
+        }
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+        }
+        .total-line.final {
+            border-top: 2px solid var(--fence-green);
+            margin-top: 5px;
+            padding-top: 10px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--fiery-glow);
+            font-family: var(--font-heading);
+        }
+
+        .total-letras {
+            text-align: right;
+            font-style: italic;
+            font-size: 12px;
+            color: var(--norfolk-green);
+            margin-bottom: 35px;
+        }
+
+        .condiciones {
+            border-top: 1px solid #cbd5e1;
+            padding-top: 15px;
+            margin-bottom: 60px; 
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.6;
+        }
+        .condiciones h4 { 
+            margin-top: 0; 
+            font-size: 12px; 
+            color: var(--fence-green);
+            text-transform: uppercase;
+        }
+        .condiciones ul { padding-left: 15px; margin: 0; }
+        .condiciones li { margin-bottom: 5px; }
+
+        .firmas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 10px;
+        }
+        .firma-box {
+            border-top: 1px solid var(--fence-green);
+            padding-top: 10px;
+        }
+        .firma-box h4 { margin: 0 0 3px 0; font-size: 13px; color: var(--fence-green); }
+        .firma-box p { margin: 0; font-size: 11px; color: var(--norfolk-green); }
+
+        .btn-remove {
+            color: var(--fiery-glow);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 18px;
+            padding: 0 5px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .btn-remove:hover { opacity: 1; }
+
+        /* =======================================================
+           🚀 BLINDAJE DE IMPRESIÓN (NATIVO DEL NAVEGADOR)
+           ======================================================= */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0 !important; 
+            }
+            body { 
+                display: block !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                background: white !important; 
+            }
+            .control-panel { 
+                display: none !important; 
+            }
+            .document-wrapper { 
+                box-shadow: none !important; 
+                width: 100% !important; 
+                max-width: 100% !important;
+                margin: 0 !important; 
+                padding: 15mm 20mm !important;
+                overflow: visible !important;
+                height: auto !important;
+                min-height: 0 !important;
+            }
+            .watermark-container {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                z-index: -1 !important;
+            }
+            .action-row, .pdf-hide, .btn-remove {
+                display: none !important;
+            }
+            .editable { 
+                border: none !important; 
+                background: transparent !important; 
+                padding: 0 !important;
+            }
+            .objeto-textarea {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            tr, .info-grid, .totals-wrapper, .condiciones, .firmas-grid, .objeto-section {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PANEL DE CONTROL UI -->
+    <div class="control-panel" id="controlPanel">
+        <div class="control-row">
+            <div class="control-group-row">
+                <div class="control-group">
+                    <label for="logoInput" style="font-size: 12px; font-weight: 500;"><i class="fa-solid fa-image"></i> Logo Encabezado:</label>
+                    <input type="file" id="logoInput" accept="image/png, image/jpeg, image/svg+xml" onchange="window.loadLogo(event)" style="width: 180px;">
+                </div>
+                <div class="control-group">
+                    <label for="watermarkInput" style="font-size: 12px; font-weight: 500;"><i class="fa-solid fa-droplet"></i> Marca de Agua:</label>
+                    <input type="file" id="watermarkInput" accept="image/png, image/jpeg, image/svg+xml" onchange="window.loadWatermark(event)" style="width: 180px;">
+                </div>
+            </div>
+            
+            <div class="control-group-row" style="margin-left: auto;">
+                
+                <!-- Botón de Login (Visible si no está autenticado) -->
+                <button onclick="window.loginConGoogle()" class="btn-google" id="btnLogin"><i class="fa-brands fa-google"></i> Acceder</button>
+                
+                <!-- Botones de Nube (Ocultos hasta autenticar) -->
+                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Guardar en la Nube (Firebase)"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube</button>
+                <button onclick="window.descargarBitacoraCloud()" class="btn-download" id="btnDownload" style="display: none;" title="Descargar CSV del Historial Cloud"><i class="fa-solid fa-file-csv"></i> Descargar Historial</button>
+                
+                <button onclick="window.generarPDFNativo()" class="btn-accent" title="Abre el asistente de impresión para guardar como PDF"><i class="fa-solid fa-file-pdf"></i> Generar PDF Oficial</button>
+            </div>
+        </div>
+        
+        <div id="statusMessage"></div>
+    </div>
+
+    <!-- DOCUMENTO A IMPRIMIR -->
+    <div class="document-wrapper" id="cotizacionDoc">
+        
+        <div class="watermark-container">
+            <svg id="defaultWatermark" viewBox="0 0 100 100" fill="none" stroke="#09332C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="50" cy="15" r="1.5" fill="#09332C" stroke="none" />
+                <path d="M 30 85 Q 50 78 70 85" stroke="#09332C" />
+                <path d="M 50 25 C 60 45, 55 65, 50 75 C 45 65, 40 45, 50 25 Z" />
+                <path d="M 50 75 C 40 70, 30 55, 35 35 C 40 50, 45 60, 50 65" />
+                <path d="M 50 75 C 60 70, 70 55, 65 35 C 60 50, 55 60, 50 65" />
+                <path d="M 45 72 C 30 70, 15 60, 20 45 C 28 55, 35 60, 42 65" />
+                <path d="M 55 72 C 70 70, 85 60, 80 45 C 72 55, 65 60, 58 65" />
+                <path d="M 50 75 C 35 80, 15 75, 20 65 C 30 72, 40 73, 48 72" />
+                <path d="M 50 75 C 65 80, 85 75, 80 65 C 70 72, 60 73, 52 72" />
+            </svg>
+            <img id="customWatermark" src="" alt="Marca de Agua" style="display:none;">
+        </div>
+
+        <header class="doc-header">
+            <div class="logo-container">
+                <svg id="defaultSvg" class="default-logo-svg" viewBox="0 0 100 100" fill="none" stroke="#09332C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="50" cy="15" r="2" fill="#F0531C" stroke="none" />
+                    <path d="M 30 85 Q 50 78 70 85" stroke="#F0531C" stroke-width="2.5" />
+                    <path d="M 50 25 C 60 45, 55 65, 50 75 C 45 65, 40 45, 50 25 Z" />
+                    <path d="M 50 75 C 40 70, 30 55, 35 35 C 40 50, 45 60, 50 65" />
+                    <path d="M 50 75 C 60 70, 70 55, 65 35 C 60 50, 55 60, 50 65" />
+                    <path d="M 45 72 C 30 70, 15 60, 20 45 C 28 55, 35 60, 42 65" />
+                    <path d="M 55 72 C 70 70, 85 60, 80 45 C 72 55, 65 60, 58 65" />
+                    <path d="M 50 75 C 35 80, 15 75, 20 65 C 30 72, 40 73, 48 72" />
+                    <path d="M 50 75 C 65 80, 85 75, 80 65 C 70 72, 60 73, 52 72" />
+                </svg>
+                <img id="docLogo" src="" alt="SATORI Business LAB" style="display:none;">
+                <div id="logoTexto" style="font-family: var(--font-heading); text-align: center; margin-top: 5px; width: 100%;">
+                    <div style="font-weight: 500; font-size: 42px; letter-spacing: 3px; color: var(--fence-green); line-height: 1;">SATORI</div>
+                    <div style="width: 40px; height: 2px; background-color: var(--fiery-glow); margin: 8px auto;"></div>
+                    <div style="font-size: 14px; letter-spacing: 4px; font-weight: 500; color: var(--fence-green);">BUSINESS LAB</div>
+                </div>
+            </div>
+            
+            <div class="header-info">
+                <h1>COTIZACIÓN COMERCIAL</h1>
+                <div class="quote-number"># <span class="editable" contenteditable="true" id="numCotizacion">001</span></div>
+                <p><strong>Fecha de Emisión:</strong> <input type="date" id="fechaEmision" class="editable" style="font-family:inherit; color:inherit; border:none; background:transparent; font-size: 13px;"></p>
+                <p><strong>Vigencia:</strong> <span class="editable" contenteditable="true">30 días calendario</span></p>
+            </div>
+        </header>
+
+        <div class="info-grid">
+            <div class="info-block">
+                <h3>Datos del Proveedor</h3>
+                <p><strong>Razón Social:</strong> SATORI Business LAB</p>
+                <p><strong>NIT:</strong> <span class="editable" contenteditable="true">901.XXX.XXX-X</span></p>
+                <p><strong>Ciudad:</strong> Bogotá D.C., Colombia</p>
+                <p><strong>Email:</strong> <span class="editable" contenteditable="true">oficial@satorilab.co</span></p>
+            </div>
+            <div class="info-block">
+                <h3>Preparado Para</h3>
+                <p><strong>Cliente:</strong> <span class="editable" contenteditable="true" id="clienteNombre" placeholder="Razón Social del Cliente">Nombre Empresa S.A.S</span></p>
+                <p><strong>NIT / CC:</strong> <span class="editable" contenteditable="true" id="clienteNit" placeholder="Documento">800.123.456-7</span></p>
+                <p><strong>Contacto:</strong> <span class="editable" contenteditable="true" id="clienteContacto" placeholder="Contacto">Nombre del Contacto</span></p>
+                <p><strong>Email:</strong> <span class="editable" contenteditable="true" id="clienteEmail" placeholder="Correo">cliente@empresa.com</span></p>
+            </div>
+        </div>
+
+        <div class="objeto-section">
+            <h3>Objeto Estratégico:</h3>
+            <textarea class="objeto-textarea editable editable-block" id="objetoEstrategico" oninput="window.autoResize(this)" placeholder="Describe brevemente el objetivo del servicio a prestar...">Propuesta formal para el diseño de identidad corporativa integral y desarrollo estratégico de marca.</textarea>
+        </div>
+
+        <table id="itemsTable">
+            <thead>
+                <tr>
+                    <th class="col-cant">Cant.</th>
+                    <th class="col-desc">Descripción de Servicios Profesionales</th>
+                    <th class="col-unit">Valor Unitario</th>
+                    <th class="col-total">Subtotal</th>
+                    <th class="pdf-hide" style="width: 30px; background:transparent;"></th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+                <tr>
+                    <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">1</span></td>
+                    <td class="col-desc">
+                        <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">Estrategia de Branding SATORI</span></strong>
+                        <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Análisis de marca, creación de isotipo, manual de marca, paleta de colores y selección tipográfica profesional.</span>
+                    </td>
+                    <td class="col-unit">$ <span class="editable item-unit" contenteditable="true" oninput="window.calcularTotales()">2850000</span></td>
+                    <td class="col-total item-total">$ 2.850.000</td>
+                    <td class="pdf-hide"><button class="btn-remove" onclick="window.eliminarFila(this)" title="Eliminar fila"><i class="fa-solid fa-trash-can"></i></button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="action-row" id="actionRow">
+            <button onclick="window.agregarFila()"><i class="fa-solid fa-plus"></i> Agregar Nuevo Servicio</button>
+        </div>
+
+        <div class="totals-wrapper">
+            <div class="totals-box">
+                <div class="total-line">
+                    <span>Subtotal Operativo:</span>
+                    <span id="valSubtotal">$ 0</span>
+                </div>
+                <div class="total-line">
+                    <span>IVA (<span class="editable" id="ivaPorcentaje" contenteditable="true" oninput="window.calcularTotales()">0</span>%):</span>
+                    <span id="valIva">$ 0</span>
+                </div>
+                <div class="total-line final">
+                    <span>Inversión Total (COP):</span>
+                    <span id="valTotal">$ 0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="total-letras" id="totalLetras">
+            Son: Cero pesos m/cte.
+        </div>
+
+        <div class="condiciones">
+            <h4 class="editable editable-block" contenteditable="true">Términos y Condiciones Comerciales</h4>
+            <ul class="editable editable-block" contenteditable="true">
+                <li><strong>Validez:</strong> La presente propuesta económica y estratégica mantiene su vigencia por 30 días calendario.</li>
+                <li><strong>Estructura de Pago:</strong> Se requiere un anticipo del 50% para el inicio formal del proyecto. El 50% restante será liquidado contra entrega a entera satisfacción.</li>
+                <li><strong>Ejecución:</strong> Los tiempos de entrega (SLA) comenzarán a regir a partir de la confirmación bancaria del anticipo y la entrega total del brief por parte del cliente.</li>
+                <li><strong>Propiedad Intelectual:</strong> Los derechos patrimoniales sobre los diseños finales se ceden al cliente una vez cancelado el 100% de la factura correspondiente.</li>
+            </ul>
+        </div>
+
+        <div class="firmas-grid">
+            <div class="firma-box">
+                <h4 class="editable" contenteditable="true">SATORI Business LAB</h4>
+                <p class="editable editable-block" contenteditable="true">Dirección Estratégica / Firma Autorizada</p>
+            </div>
+            <div class="firma-box">
+                <h4 class="editable" contenteditable="true">Aceptación del Cliente</h4>
+                <p class="editable editable-block" contenteditable="true">Nombre, Firma, Cédula/NIT y Sello</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==========================================================
+         🚀 LÓGICA DE APLICACIÓN CON FIREBASE CLOUD (GOOGLE AUTH)
+         ========================================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ======================================================================
+        // ✅ TUS CREDENCIALES INYECTADAS
+        // ======================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
+            authDomain: "satori-bl-cotizador.firebaseapp.com",
+            projectId: "satori-bl-cotizador",
+            storageBucket: "satori-bl-cotizador.firebasestorage.app",
+            messagingSenderId: "671211767556",
+            appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
+        };
+
+        let db, auth, currentUser;
+        let isFirebaseActive = false;
+        const provider = new GoogleAuthProvider();
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            isFirebaseActive = true;
+
+            // Rastreador de estado de sesión
+            onAuthStateChanged(auth, (user) => {
+                const btnLogin = document.getElementById('btnLogin');
+                const btnSave = document.getElementById('btnSave');
+                const btnDownload = document.getElementById('btnDownload');
+
+                if (user) {
+                    currentUser = user;
+                    // Mostrar herramientas de la nube
+                    btnLogin.style.display = 'none';
+                    btnSave.style.display = 'flex';
+                    btnDownload.style.display = 'flex';
+                    
+                    window.mostrarMensaje(`Hola, ${user.displayName.split(' ')[0]}`, 'success');
+                    cargarConsecutivoCloud();
+                } else {
+                    currentUser = null;
+                    // Ocultar herramientas, mostrar botón de Login
+                    btnLogin.style.display = 'flex';
+                    btnSave.style.display = 'none';
+                    btnDownload.style.display = 'none';
+                }
+            });
+        } catch (e) {
+            console.error("Firebase Initialization Error:", e);
+        }
+
+        window.mostrarMensaje = function(texto, tipo) {
+            const msgBox = document.getElementById('statusMessage');
+            msgBox.innerText = texto;
+            msgBox.className = tipo === 'success' ? 'status-success' : 'status-error';
+            msgBox.style.display = 'block';
+            setTimeout(() => { msgBox.style.display = 'none'; }, 6000);
+        }
+
+        // --- SISTEMA DE LOGIN CON GOOGLE ---
+        window.loginConGoogle = function() {
+            if (!isFirebaseActive) return;
+            
+            signInWithPopup(auth, provider).catch((error) => {
+                console.error("Error al autenticar:", error);
+                window.mostrarMensaje('❌ No se pudo iniciar sesión.', 'error');
+            });
+        }
+
+        async function cargarConsecutivoCloud() {
+            if (!currentUser || !db) return;
+            try {
+                // Guarda en una colección ligada al ID único de tu cuenta de Google
+                const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
+                const snapshot = await getDocs(colRef);
+                
+                let maxConsecutivo = 0;
+                snapshot.forEach(doc => {
+                    const num = parseInt(doc.data().consecutivo, 10);
+                    if (!isNaN(num) && num > maxConsecutivo) {
+                        maxConsecutivo = num;
+                    }
+                });
+                
+                const nextNumber = ("000" + (maxConsecutivo + 1)).slice(-3);
+                document.getElementById('numCotizacion').innerText = nextNumber;
+            } catch (e) {
+                console.error("Error cargando consecutivo:", e);
+            }
+        }
+
+        window.guardarRegistroCloud = async function() {
+            if (!isFirebaseActive || !currentUser) {
+                window.mostrarMensaje('⚠️ Debes iniciar sesión con Google primero.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnSave');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+            btn.disabled = true;
+
+            let resumenItems = "";
+            document.querySelectorAll('#itemsBody tr').forEach(fila => {
+                const cant = fila.querySelector('.item-cant').innerText.trim();
+                const titulo = fila.querySelector('.item-titulo').innerText.trim();
+                const totalFila = fila.querySelector('.item-total').innerText.trim();
+                resumenItems += `[${cant}x ${titulo} = ${totalFila}] `;
+            });
+
+            const payload = {
+                consecutivo: document.getElementById('numCotizacion').innerText.trim(),
+                fecha: document.getElementById('fechaEmision').value,
+                cliente: document.getElementById('clienteNombre').innerText.trim(),
+                nit: document.getElementById('clienteNit').innerText.trim(),
+                contacto: document.getElementById('clienteContacto').innerText.trim(),
+                email: document.getElementById('clienteEmail').innerText.trim(),
+                objeto: document.getElementById('objetoEstrategico').value.trim(),
+                itemsDetalle: resumenItems.trim(),
+                subtotal: window.valorSubtotalReal || 0,
+                iva: window.valorIvaReal || 0,
+                total: window.valorTotalReal || 0,
+                timestamp: new Date().getTime() 
+            };
+
+            try {
+                const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
+                await addDoc(colRef, payload);
+                
+                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente en tu Firebase!', 'success');
+                
+                const currentNum = parseInt(payload.consecutivo, 10);
+                if (!isNaN(currentNum)) {
+                    document.getElementById('numCotizacion').innerText = ("000" + (currentNum + 1)).slice(-3);
+                }
+            } catch (e) {
+                console.error("Error guardando:", e);
+                window.mostrarMensaje('❌ Error al guardar. Revisa la consola y las reglas de Firestore.', 'error');
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube';
+                btn.disabled = false;
+            }
+        }
+
+        window.descargarBitacoraCloud = async function() {
+            if (!isFirebaseActive || !currentUser) return;
+            
+            window.mostrarMensaje('⏳ Descargando historial...', 'success');
+
+            try {
+                const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
+                const snapshot = await getDocs(colRef);
+                
+                if(snapshot.empty) {
+                    window.mostrarMensaje('⚠️ No hay cotizaciones guardadas aún.', 'error');
+                    return;
+                }
+
+                let historial = [];
+                snapshot.forEach(doc => { historial.push(doc.data()); });
+                historial.sort((a, b) => parseInt(a.consecutivo) - parseInt(b.consecutivo));
+
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                csvContent += "Consecutivo,Fecha,Cliente,NIT,Contacto,Email,Objeto Estrategico,Detalle Servicios,Subtotal,IVA,Total\n";
+
+                historial.forEach(row => {
+                    let rowData = [
+                        row.consecutivo, row.fecha,
+                        `"${(row.cliente || '').replace(/"/g, '""')}"`,
+                        `"${(row.nit || '').replace(/"/g, '""')}"`,
+                        `"${(row.contacto || '').replace(/"/g, '""')}"`,
+                        `"${(row.email || '').replace(/"/g, '""')}"`,
+                        `"${(row.objeto || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                        `"${(row.itemsDetalle || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                        row.subtotal, row.iva, row.total
+                    ];
+                    csvContent += rowData.join(",") + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "Historial_Cotizaciones_SATORI.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (e) {
+                console.error("Error descargando:", e);
+                window.mostrarMensaje('❌ Error al descargar el historial.', 'error');
+            }
+        }
+
+        // --- FUNCIONES DE UI ---
+        window.autoResize = function(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        window.loadLogo = function(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const image = document.getElementById('docLogo');
+                    const defaultSvg = document.getElementById('defaultSvg');
+                    const texto = document.getElementById('logoTexto');
+                    image.src = e.target.result; 
+                    image.style.display = 'block';
+                    defaultSvg.style.display = 'none';
+                    texto.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        window.loadWatermark = function(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const customImg = document.getElementById('customWatermark');
+                    const defaultSvg = document.getElementById('defaultWatermark');
+                    customImg.src = e.target.result; 
+                    customImg.style.display = 'block';
+                    defaultSvg.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        const formateador = new Intl.NumberFormat('es-CO');
+
+        window.agregarFila = function() {
+            const tbody = document.getElementById('itemsBody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">1</span></td>
+                <td class="col-desc">
+                    <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">Nuevo Servicio</span></strong>
+                    <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Descripción detallada del servicio o entregable.</span>
+                </td>
+                <td class="col-unit">$ <span class="editable item-unit" contenteditable="true" oninput="window.calcularTotales()">0</span></td>
+                <td class="col-total item-total">$ 0</td>
+                <td class="pdf-hide"><button class="btn-remove" onclick="window.eliminarFila(this)" title="Eliminar fila"><i class="fa-solid fa-trash-can"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+            window.calcularTotales();
+        }
+
+        window.eliminarFila = function(btn) {
+            btn.closest('tr').remove();
+            window.calcularTotales();
+        }
+
+        function limpiarNumero(str) { return parseFloat(str.replace(/[^0-9.-]+/g,"")) || 0; }
+
+        window.valorSubtotalReal = 0; window.valorIvaReal = 0; window.valorTotalReal = 0;
+
+        window.calcularTotales = function() {
+            let subtotal = 0;
+            document.querySelectorAll('#itemsBody tr').forEach(fila => {
+                const cant = limpiarNumero(fila.querySelector('.item-cant').innerText);
+                const unit = limpiarNumero(fila.querySelector('.item-unit').innerText);
+                const totalFila = cant * unit;
+                fila.querySelector('.item-total').innerText = '$ ' + formateador.format(totalFila);
+                subtotal += totalFila;
+            });
+
+            const ivaPorcentajeText = document.getElementById('ivaPorcentaje').innerText;
+            const porcentaje = parseFloat(ivaPorcentajeText.replace(/[^0-9.-]+/g,"")) || 0;
+            const iva = subtotal * (porcentaje / 100); 
+            const total = subtotal + iva;
+
+            window.valorSubtotalReal = subtotal; window.valorIvaReal = iva; window.valorTotalReal = total;
+            document.getElementById('valSubtotal').innerText = '$ ' + formateador.format(subtotal);
+            document.getElementById('valIva').innerText = '$ ' + formateador.format(iva);
+            document.getElementById('valTotal').innerText = '$ ' + formateador.format(total);
+            document.getElementById('totalLetras').innerText = `Son: ${numeroALetras(total)} pesos m/cte.`;
+        }
+
+        function numeroALetras(num) {
+            if (num === 0) return 'Cero';
+            const unidades = ['', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+            const decenas = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+            const centenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+            function convertirGrupo(n) {
+                let letras = '';
+                let c = Math.floor(n / 100), d = Math.floor((n % 100) / 10), u = n % 10;
+                if (c === 1 && d === 0 && u === 0) letras += 'cien '; else if (c !== 0) letras += centenas[c] + ' ';
+                if (d === 1) letras += decenas[u] + ' '; else if (d === 2) { if (u === 0) letras += 'veinte '; else letras += 'veinti' + unidades[u] + ' '; } else if (d > 2) { letras += decenas[d + 7] + ' '; if (u !== 0) letras += 'y ' + unidades[u] + ' '; } else if (d === 0 && u !== 0) letras += unidades[u] + ' ';
+                return letras.trim();
+            }
+            let numEntero = Math.floor(num), str = '', millones = Math.floor(numEntero / 1000000), miles = Math.floor((numEntero % 1000000) / 1000), resto = numEntero % 1000;
+            if (millones > 0) { if (millones === 1) str += 'un millon '; else str += convertirGrupo(millones) + ' millones '; }
+            if (miles > 0) { if (miles === 1) str += 'mil '; else str += convertirGrupo(miles) + ' mil '; }
+            if (resto > 0) str += convertirGrupo(resto);
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        window.generarPDFNativo = function() {
+            window.autoResize(document.getElementById('objetoEstrategico'));
+            window.print();
+        }
+
+        document.getElementById('fechaEmision').valueAsDate = new Date();
+        window.autoResize(document.getElementById('objetoEstrategico'));
+        window.calcularTotales();
+    </script>
+</body>
+</html>
