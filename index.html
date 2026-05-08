@@ -39,7 +39,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: auto; 
+            overflow-x: hidden; 
         }
 
         h1, h2, h3, h4, th, .bold {
@@ -54,7 +54,8 @@
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(9, 51, 44, 0.1);
             margin-bottom: 30px;
-            width: 210mm; 
+            width: 100%; 
+            max-width: 210mm; 
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -96,6 +97,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            justify-content: center;
         }
 
         button:hover { background-color: var(--norfolk-green); }
@@ -135,7 +137,8 @@
         /* --- DOCUMENTO EKRANE --- */
         .document-wrapper {
             background: #ffffff;
-            width: 210mm; 
+            width: 100%; 
+            max-width: 210mm; 
             min-height: 297mm; 
             padding: 20mm; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
@@ -147,7 +150,8 @@
             top: 45%; 
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 450px;
+            width: 100%;
+            max-width: 450px;
             pointer-events: none;
             z-index: 0;
             display: flex;
@@ -243,7 +247,6 @@
             color: var(--fence-green);
         }
 
-        /* Bloque de datos (Flexbox para estabilidad en PDF) */
         .info-grid {
             display: flex;
             justify-content: space-between;
@@ -256,7 +259,7 @@
             background-color: transparent; 
             padding: 0; 
             border: none;
-            width: 48%; /* Ancho estricto para evitar colapsos */
+            width: 48%; 
         }
         .info-block h3 {
             margin-top: 0;
@@ -302,10 +305,16 @@
             display: block;
         }
 
+        .table-responsive-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 20px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
             font-size: 13px;
             position: relative;
             z-index: 1;
@@ -335,7 +344,6 @@
             margin-bottom: 30px;
         }
         
-        /* SOLUCIÓN AL COLAPSO DE TOTALES: Tabla HTML clásica e indestructible */
         .totals-wrapper {
             display: block;
             width: 100%;
@@ -344,12 +352,13 @@
         }
         .totals-table {
             width: 350px;
-            margin-left: auto; /* Alinea a la derecha de forma nativa */
+            margin-left: auto; 
             background-color: var(--venetian-lace);
             border-radius: 8px;
             padding: 15px 20px;
             border-collapse: separate;
             border-spacing: 0;
+            margin-bottom: 0;
         }
         .totals-table td {
             padding: 6px 0;
@@ -395,7 +404,6 @@
         .condiciones ul { padding-left: 15px; margin: 0; }
         .condiciones li { margin-bottom: 5px; }
 
-        /* Firmas (Migrado a Flexbox para PDF seguro) */
         .firmas-grid {
             display: flex;
             justify-content: space-between;
@@ -404,7 +412,7 @@
             page-break-inside: avoid !important;
         }
         .firma-box {
-            width: 48%; /* Evita que colapsen */
+            width: 48%; 
             border-top: 1px solid var(--fence-green);
             padding-top: 10px;
         }
@@ -424,8 +432,34 @@
         .btn-remove:hover { opacity: 1; }
 
         /* =======================================================
-           🚀 PROTECCIÓN DE IMPRESIÓN NATIVA 
-           Márgenes físicos a 20mm
+           📱 DISEÑO RESPONSIVE (MÓVILES Y TABLETS)
+           ======================================================= */
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            .document-wrapper { padding: 15px; }
+            
+            .doc-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .header-info { text-align: left; }
+            
+            .info-grid { flex-direction: column; gap: 20px; }
+            .info-block { width: 100%; }
+            
+            .firmas-grid { flex-direction: column; gap: 30px; }
+            .firma-box { width: 100%; }
+            
+            .totals-table { width: 100%; margin-left: 0; }
+            
+            .control-row { flex-direction: column; align-items: stretch; }
+            .control-group-row { flex-direction: column; width: 100%; }
+            .control-group { width: 100%; }
+            .control-group input { width: 100% !important; }
+            .control-group-row button { width: 100%; }
+            
+            table { min-width: 500px; /* Fuerza ancho mínimo para que no se aplaste el texto */ }
+        }
+
+        /* =======================================================
+           🚀 PROTECCIÓN DE IMPRESIÓN NATIVA (NO SE AFECTA POR MÓVIL)
            ======================================================= */
         @media print {
             @page {
@@ -440,12 +474,11 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .control-panel { 
-                display: none !important; 
-            }
+            .control-panel { display: none !important; }
             .document-wrapper { 
                 box-shadow: none !important; 
                 width: 100% !important; 
+                max-width: 100% !important;
                 margin: 0 !important; 
                 padding: 0 !important; 
             }
@@ -456,34 +489,31 @@
                 transform: translate(-50%, -50%) !important;
                 z-index: -1 !important;
             }
-            .action-row, .pdf-hide, .btn-remove {
-                display: none !important;
-            }
-            .editable { 
-                border: none !important; 
-                background: transparent !important; 
-                padding: 0 !important;
-            }
-            .objeto-textarea {
-                border: none !important; 
-                background: transparent !important; 
-                overflow: visible !important;
-                resize: none !important;
-            }
-            /* Garantía anti-cortes de PDF */
+            .action-row, .pdf-hide, .btn-remove { display: none !important; }
+            .editable { border: none !important; background: transparent !important; padding: 0 !important; }
+            .objeto-textarea { border: none !important; background: transparent !important; overflow: visible !important; resize: none !important; }
+            
+            /* Obligar a recuperar el formato de filas si el usuario imprime desde el móvil */
+            .doc-header { flex-direction: row !important; align-items: center !important; }
+            .header-info { text-align: right !important; }
+            .info-grid { flex-direction: row !important; }
+            .info-block { width: 48% !important; }
+            .firmas-grid { flex-direction: row !important; }
+            .firma-box { width: 48% !important; }
+            .totals-table { width: 350px !important; margin-left: auto !important; }
+            .table-responsive-wrapper { overflow: visible !important; }
+            table { min-width: 100% !important; }
+
             tr, td, th, .info-block, .totals-table, .condiciones, .firma-box {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
-            h1, h2, h3, h4 {
-                page-break-after: avoid !important;
-            }
+            h1, h2, h3, h4 { page-break-after: avoid !important; }
         }
     </style>
 </head>
 <body>
 
-    <!-- IFRAME Y FORMULARIO OCULTOS PARA BYPASS DE CORS HACIA GOOGLE SHEETS -->
     <iframe id="sheetIframe" name="sheetIframe" style="display:none;"></iframe>
     <form id="sheetForm" method="POST" target="sheetIframe" style="display:none;"></form>
 
@@ -579,404 +609,20 @@
             <textarea class="objeto-textarea editable editable-block" id="objetoEstrategico" oninput="window.autoResize(this)" placeholder="Describe brevemente el objetivo del servicio a prestar...">Propuesta formal para el diseño de identidad corporativa integral y desarrollo estratégico de marca.</textarea>
         </div>
 
-        <table id="itemsTable">
-            <thead>
-                <tr>
-                    <th class="col-cant">Cant.</th>
-                    <th class="col-desc">Descripción de Servicios Profesionales</th>
-                    <th class="col-unit">Valor Unitario</th>
-                    <th class="col-total">Subtotal</th>
-                    <th class="pdf-hide" style="width: 30px; background:transparent;"></th>
-                </tr>
-            </thead>
-            <tbody id="itemsBody">
-                <tr>
-                    <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">1</span></td>
-                    <td class="col-desc">
-                        <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">Estrategia de Branding SATORI</span></strong>
-                        <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Análisis de marca, creación de isotipo, manual de marca, paleta de colores y selección tipográfica profesional.</span>
-                    </td>
-                    <td class="col-unit">$ <span class="editable item-unit" contenteditable="true" oninput="window.calcularTotales()">2850000</span></td>
-                    <td class="col-total item-total">$ 2.850.000</td>
-                    <td class="pdf-hide"><button class="btn-remove" onclick="window.eliminarFila(this)" title="Eliminar fila"><i class="fa-solid fa-trash-can"></i></button></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="action-row" id="actionRow">
-            <button onclick="window.agregarFila()"><i class="fa-solid fa-plus"></i> Agregar Nuevo Servicio</button>
-        </div>
-
-        <div class="totals-wrapper">
-            <!-- TABLA INDESTRUCTIBLE PARA TOTALES (Corregida para evitar colapsos) -->
-            <table class="totals-table">
-                <tr>
-                    <td class="text-right">Subtotal Operativo:</td>
-                    <td class="text-right" id="valSubtotal" style="width: 130px;">$ 0</td>
-                </tr>
-                <tr>
-                    <td class="text-right">IVA (<span class="editable" id="ivaPorcentaje" contenteditable="true" oninput="window.calcularTotales()">0</span>%):</td>
-                    <td class="text-right" id="valIva">$ 0</td>
-                </tr>
-                <tr class="final">
-                    <td class="text-right">Inversión Total (COP):</td>
-                    <td class="text-right" id="valTotal">$ 0</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="total-letras" id="totalLetras">
-            Son: Cero pesos m/cte.
-        </div>
-
-        <div class="condiciones">
-            <h4 class="editable editable-block" contenteditable="true">Términos y Condiciones Comerciales</h4>
-            <ul class="editable editable-block" contenteditable="true">
-                <li><strong>Validez:</strong> La presente propuesta económica y estratégica mantiene su vigencia por 30 días calendario.</li>
-                <li><strong>Estructura de Pago:</strong> Se requiere un anticipo del 50% para el inicio formal del proyecto. El 50% restante será liquidado contra entrega a entera satisfacción.</li>
-                <li><strong>Ejecución:</strong> Los tiempos de entrega (SLA) comenzarán a regir a partir de la confirmación bancaria del anticipo y la entrega total del brief por parte del cliente.</li>
-                <li><strong>Propiedad Intelectual:</strong> Los derechos patrimoniales sobre los diseños finales se ceden al cliente una vez cancelado el 100% de la factura correspondiente.</li>
-            </ul>
-        </div>
-
-        <div class="firmas-grid">
-            <div class="firma-box">
-                <h4 class="editable" contenteditable="true">SATORI Business LAB</h4>
-                <p class="editable editable-block" contenteditable="true">Dirección Estratégica / Firma Autorizada</p>
-            </div>
-            <div class="firma-box">
-                <h4 class="editable" contenteditable="true">Aceptación del Cliente</h4>
-                <p class="editable editable-block" contenteditable="true">Nombre, Firma, Cédula/NIT y Sello</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==========================================================
-         🚀 LÓGICA CON FIREBASE Y GOOGLE SHEETS VIA FORM-IFRAME
-         ========================================================== -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // ======================================================================
-        // ⚠️ 1. PEGA AQUÍ TUS CREDENCIALES DE FIREBASE
-        // ======================================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
-            authDomain: "satori-bl-cotizador.firebaseapp.com",
-            projectId: "satori-bl-cotizador",
-            storageBucket: "satori-bl-cotizador.firebasestorage.app",
-            messagingSenderId: "671211767556",
-            appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
-        };
-        
-        // ======================================================================
-        // ⚠️ 2. PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-        // ======================================================================
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzJns2_5cr9RRbxhZS1fka1gm6MGB7LKUedm41iD9glgBoMEye4WlQabdSBen3Rr4qMew/exec";
-
-        let db, auth, currentUser;
-        let isFirebaseActive = false;
-        const provider = new GoogleAuthProvider();
-
-        try {
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            isFirebaseActive = true;
-
-            onAuthStateChanged(auth, (user) => {
-                const btnLogin = document.getElementById('btnLogin');
-                const btnSave = document.getElementById('btnSave');
-                const btnDownload = document.getElementById('btnDownload');
-
-                if (user) {
-                    currentUser = user;
-                    btnLogin.style.display = 'none';
-                    btnSave.style.display = 'flex';
-                    btnDownload.style.display = 'flex';
-                    window.mostrarMensaje(`Conectado a la Nube. Hola, ${user.displayName.split(' ')[0]}`, 'success');
-                    cargarConsecutivoCloud();
-                } else {
-                    currentUser = null;
-                    btnLogin.style.display = 'flex';
-                    btnSave.style.display = 'none';
-                    btnDownload.style.display = 'none';
-                }
-            });
-        } catch (e) {
-            console.error("Error de Firebase:", e);
-        }
-
-        window.mostrarMensaje = function(texto, tipo) {
-            const msgBox = document.getElementById('statusMessage');
-            msgBox.innerText = texto;
-            msgBox.className = tipo === 'success' ? 'status-success' : 'status-error';
-            msgBox.style.display = 'block';
-            setTimeout(() => { msgBox.style.display = 'none'; }, 6000);
-        }
-
-        window.loginConGoogle = function() {
-            if (!isFirebaseActive) return;
-            signInWithPopup(auth, provider).catch((error) => {
-                console.error("Error al autenticar:", error);
-                window.mostrarMensaje('❌ No se pudo iniciar sesión.', 'error');
-            });
-        }
-
-        // Leer consecutivo desde Sheets via GET limpio
-        async function cargarConsecutivoCloud() {
-            if (!GOOGLE_SHEETS_URL) return;
-            try {
-                const resp = await fetch(GOOGLE_SHEETS_URL);
-                const result = await resp.json();
-                if (result && result.nextConsecutivo) {
-                    document.getElementById('numCotizacion').innerText = result.nextConsecutivo;
-                }
-            } catch (e) {
-                console.error("Error cargando consecutivo desde Sheets:", e);
-            }
-        }
-
-        window.guardarRegistroCloud = async function() {
-            if (!isFirebaseActive || !currentUser) {
-                window.mostrarMensaje('⚠️ Debes iniciar sesión con Google primero.', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('btnSave');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-            btn.disabled = true;
-
-            let resumenItems = "";
-            document.querySelectorAll('#itemsBody tr').forEach(fila => {
-                const cant = fila.querySelector('.item-cant').innerText.trim();
-                const titulo = fila.querySelector('.item-titulo').innerText.trim();
-                const totalFila = fila.querySelector('.item-total').innerText.trim();
-                resumenItems += `[${cant}x ${titulo} = ${totalFila}] `;
-            });
-
-            const payload = {
-                action: "save",
-                consecutivo: document.getElementById('numCotizacion').innerText.trim(),
-                fecha: document.getElementById('fechaEmision').value,
-                cliente: document.getElementById('clienteNombre').innerText.trim(),
-                nit: document.getElementById('clienteNit').innerText.trim(),
-                contacto: document.getElementById('clienteContacto').innerText.trim(),
-                email: document.getElementById('clienteEmail').innerText.trim(),
-                objeto: document.getElementById('objetoEstrategico').value.trim(),
-                itemsDetalle: resumenItems.trim(),
-                subtotal: window.valorSubtotalReal || 0,
-                iva: window.valorIvaReal || 0,
-                total: window.valorTotalReal || 0,
-                timestamp: new Date().getTime() 
-            };
-
-            try {
-                // 1. Guardar y asegurar en Firebase
-                const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
-                await addDoc(colRef, payload);
-                
-                // 2. MÉTODO INFALIBLE: Formulario Oculto para Google Sheets
-                const form = document.getElementById('sheetForm');
-                const iframe = document.getElementById('sheetIframe');
-                
-                // Limpiar y recrear campos
-                form.innerHTML = '';
-                Object.keys(payload).forEach(key => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = key;
-                    input.value = String(payload[key]);
-                    form.appendChild(input);
-                });
-                
-                // Resetear iframe y enviar
-                iframe.src = 'about:blank';
-                form.action = GOOGLE_SHEETS_URL;
-                form.submit();
-                
-                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente y enviada a Sheets!', 'success');
-                
-                // Actualizar UI
-                const currentNum = parseInt(payload.consecutivo, 10);
-                if (!isNaN(currentNum)) {
-                    document.getElementById('numCotizacion').innerText = ("000" + (currentNum + 1)).slice(-3);
-                }
-                
-            } catch (e) {
-                console.error("Error guardando:", e);
-                window.mostrarMensaje('❌ Error al guardar en Firebase.', 'error');
-            } finally {
-                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube';
-                btn.disabled = false;
-            }
-        }
-
-        window.descargarBitacoraCloud = async function() {
-            if (!isFirebaseActive || !currentUser) return;
-            window.mostrarMensaje('⏳ Descargando historial...', 'success');
-
-            try {
-                const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
-                const snapshot = await getDocs(colRef);
-                
-                if(snapshot.empty) {
-                    window.mostrarMensaje('⚠️ No hay cotizaciones guardadas aún.', 'error');
-                    return;
-                }
-
-                let historial = [];
-                snapshot.forEach(doc => { historial.push(doc.data()); });
-                historial.sort((a, b) => parseInt(a.consecutivo) - parseInt(b.consecutivo));
-
-                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-                csvContent += "Consecutivo,Fecha,Cliente,NIT,Contacto,Email,Objeto Estrategico,Detalle Servicios,Subtotal,IVA,Total\n";
-
-                historial.forEach(row => {
-                    let rowData = [
-                        row.consecutivo, row.fecha,
-                        `"${(row.cliente || '').replace(/"/g, '""')}"`,
-                        `"${(row.nit || '').replace(/"/g, '""')}"`,
-                        `"${(row.contacto || '').replace(/"/g, '""')}"`,
-                        `"${(row.email || '').replace(/"/g, '""')}"`,
-                        `"${(row.objeto || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-                        `"${(row.itemsDetalle || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-                        row.subtotal, row.iva, row.total
-                    ];
-                    csvContent += rowData.join(",") + "\n";
-                });
-
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "Historial_Cotizaciones_SATORI.csv");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } catch (e) {
-                console.error("Error descargando:", e);
-                window.mostrarMensaje('❌ Error al descargar el historial.', 'error');
-            }
-        }
-
-        // --- FUNCIONES DE UI ---
-        window.autoResize = function(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }
-
-        window.loadLogo = function(event) {
-            const file = event.target.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const image = document.getElementById('docLogo');
-                    const defaultSvg = document.getElementById('defaultSvg');
-                    const texto = document.getElementById('logoTexto');
-                    image.src = e.target.result; 
-                    image.style.display = 'block';
-                    defaultSvg.style.display = 'none';
-                    texto.style.display = 'none';
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        window.loadWatermark = function(event) {
-            const file = event.target.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const customImg = document.getElementById('customWatermark');
-                    const defaultSvg = document.getElementById('defaultWatermark');
-                    customImg.src = e.target.result; 
-                    customImg.style.display = 'block';
-                    defaultSvg.style.display = 'none';
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        const formateador = new Intl.NumberFormat('es-CO');
-
-        window.agregarFila = function() {
-            const tbody = document.getElementById('itemsBody');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">1</span></td>
-                <td class="col-desc">
-                    <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">Nuevo Servicio</span></strong>
-                    <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Descripción detallada del servicio o entregable.</span>
-                </td>
-                <td class="col-unit">$ <span class="editable item-unit" contenteditable="true" oninput="window.calcularTotales()">0</span></td>
-                <td class="col-total item-total">$ 0</td>
-                <td class="pdf-hide"><button class="btn-remove" onclick="window.eliminarFila(this)" title="Eliminar fila"><i class="fa-solid fa-trash-can"></i></button></td>
-            `;
-            tbody.appendChild(tr);
-            window.calcularTotales();
-        }
-
-        window.eliminarFila = function(btn) {
-            btn.closest('tr').remove();
-            window.calcularTotales();
-        }
-
-        function limpiarNumero(str) { return parseFloat(str.replace(/[^0-9.-]+/g,"")) || 0; }
-
-        window.valorSubtotalReal = 0; window.valorIvaReal = 0; window.valorTotalReal = 0;
-
-        window.calcularTotales = function() {
-            let subtotal = 0;
-            document.querySelectorAll('#itemsBody tr').forEach(fila => {
-                const cant = limpiarNumero(fila.querySelector('.item-cant').innerText);
-                const unit = limpiarNumero(fila.querySelector('.item-unit').innerText);
-                const totalFila = cant * unit;
-                fila.querySelector('.item-total').innerText = '$ ' + formateador.format(totalFila);
-                subtotal += totalFila;
-            });
-
-            const ivaPorcentajeText = document.getElementById('ivaPorcentaje').innerText;
-            const porcentaje = parseFloat(ivaPorcentajeText.replace(/[^0-9.-]+/g,"")) || 0;
-            const iva = subtotal * (porcentaje / 100); 
-            const total = subtotal + iva;
-
-            window.valorSubtotalReal = subtotal; window.valorIvaReal = iva; window.valorTotalReal = total;
-            document.getElementById('valSubtotal').innerText = '$ ' + formateador.format(subtotal);
-            document.getElementById('valIva').innerText = '$ ' + formateador.format(iva);
-            document.getElementById('valTotal').innerText = '$ ' + formateador.format(total);
-            document.getElementById('totalLetras').innerText = `Son: ${numeroALetras(total)} pesos m/cte.`;
-        }
-
-        function numeroALetras(num) {
-            if (num === 0) return 'Cero';
-            const unidades = ['', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
-            const decenas = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
-            const centenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
-            function convertirGrupo(n) {
-                let letras = '';
-                let c = Math.floor(n / 100), d = Math.floor((n % 100) / 10), u = n % 10;
-                if (c === 1 && d === 0 && u === 0) letras += 'cien '; else if (c !== 0) letras += centenas[c] + ' ';
-                if (d === 1) letras += decenas[u] + ' '; else if (d === 2) { if (u === 0) letras += 'veinte '; else letras += 'veinti' + unidades[u] + ' '; } else if (d > 2) { letras += decenas[d + 7] + ' '; if (u !== 0) letras += 'y ' + unidades[u] + ' '; } else if (d === 0 && u !== 0) letras += unidades[u] + ' ';
-                return letras.trim();
-            }
-            let numEntero = Math.floor(num), str = '', millones = Math.floor(numEntero / 1000000), miles = Math.floor((numEntero % 1000000) / 1000), resto = numEntero % 1000;
-            if (millones > 0) { if (millones === 1) str += 'un millon '; else str += convertirGrupo(millones) + ' millones '; }
-            if (miles > 0) { if (miles === 1) str += 'mil '; else str += convertirGrupo(miles) + ' mil '; }
-            if (resto > 0) str += convertirGrupo(resto);
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        window.generarPDFNativo = function() {
-            window.autoResize(document.getElementById('objetoEstrategico'));
-            // Usamos impresión nativa. Asegúrate de habilitar "Gráficos de fondo" y deshabilitar "Encabezados y pie de página"
-            window.print();
-        }
-
-        document.getElementById('fechaEmision').valueAsDate = new Date();
-        window.autoResize(document.getElementById('objetoEstrategico'));
-        window.calcularTotales();
-    </script>
-</body>
-</html>
+        <div class="table-responsive-wrapper">
+            <table id="itemsTable">
+                <thead>
+                    <tr>
+                        <th class="col-cant">Cant.</th>
+                        <th class="col-desc">Descripción de Servicios Profesionales</th>
+                        <th class="col-unit">Valor Unitario</th>
+                        <th class="col-total">Subtotal</th>
+                        <th class="pdf-hide" style="width: 30px; background:transparent;"></th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody">
+                    <tr>
+                        <td class="col-cant"><span class="editable item-cant" contenteditable="true" oninput="window.calcularTotales()">1</span></td>
+                        <td class="col-desc">
+                            <strong style="display:block; margin-bottom:5px;"><span class="editable item-titulo" contenteditable="true">Estrategia de Branding SATORI</span></strong>
+                            <span class="editable item-detalle editable-block" contenteditable="true" style="color: #475569; font-size: 12px; display:block;">Análisis de marca, creación de isotipo, manual de marca, paleta de colores y selección tipográfica profesional.</span>
