@@ -127,6 +127,7 @@
             font-weight: 500;
             margin-top: 10px;
             text-align: center;
+            width: 100%;
         }
         .status-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .status-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
@@ -242,10 +243,11 @@
             color: var(--fence-green);
         }
 
+        /* Bloque de datos (Migrado a Flexbox para estabilidad en PDF) */
         .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px; 
+            display: flex;
+            justify-content: space-between;
+            gap: 20px; 
             margin-bottom: 30px;
             position: relative;
             z-index: 1;
@@ -253,7 +255,8 @@
         .info-block {
             background-color: transparent; 
             padding: 0; 
-            border: none; 
+            border: none;
+            width: 48%; /* Ancho estricto para evitar colapsos */
         }
         .info-block h3 {
             margin-top: 0;
@@ -296,6 +299,7 @@
             border: none;
             resize: none;
             overflow: hidden;
+            display: block;
         }
 
         table {
@@ -331,7 +335,7 @@
             margin-bottom: 30px;
         }
         
-        /* SOLUCIÓN AL COLAPSO DE TOTALES: Tabla estricta HTML indestructible */
+        /* SOLUCIÓN AL COLAPSO DE TOTALES: Tabla HTML clásica e indestructible */
         .totals-wrapper {
             display: block;
             width: 100%;
@@ -340,7 +344,7 @@
         }
         .totals-table {
             width: 350px;
-            margin-left: auto; /* Alinea a la derecha de forma segura */
+            margin-left: auto; /* Alinea a la derecha de forma nativa */
             background-color: var(--venetian-lace);
             border-radius: 8px;
             padding: 15px 20px;
@@ -391,14 +395,16 @@
         .condiciones ul { padding-left: 15px; margin: 0; }
         .condiciones li { margin-bottom: 5px; }
 
+        /* Firmas (Migrado a Flexbox para PDF seguro) */
         .firmas-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
             margin-top: 10px;
             page-break-inside: avoid !important;
         }
         .firma-box {
+            width: 48%; /* Evita que colapsen */
             border-top: 1px solid var(--fence-green);
             padding-top: 10px;
         }
@@ -419,19 +425,19 @@
 
         /* =======================================================
            🚀 PROTECCIÓN DE IMPRESIÓN NATIVA 
-           Aumentadas las márgenes superiores a 25mm
            ======================================================= */
         @media print {
             @page {
                 size: A4 portrait;
-                /* Incrementado a 25mm arriba/abajo para que la pág 2 respire */
-                margin: 25mm 20mm !important; 
+                margin: 20mm 15mm !important; /* 20mm arriba/abajo soluciona el problema de la pág 2 pegada */
             }
             body { 
                 display: block !important; 
                 margin: 0 !important; 
                 padding: 0 !important; 
                 background: white !important; 
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .control-panel { 
                 display: none !important; 
@@ -439,14 +445,9 @@
             .document-wrapper { 
                 box-shadow: none !important; 
                 width: 100% !important; 
-                max-width: 100% !important;
                 margin: 0 !important; 
-                padding: 0 !important; 
-                overflow: visible !important;
-                height: auto !important;
-                min-height: 0 !important;
+                padding: 0 !important; /* Los márgenes ahora los controla exclusivamente @page */
             }
-            
             .watermark-container {
                 position: fixed !important;
                 top: 50% !important;
@@ -454,7 +455,6 @@
                 transform: translate(-50%, -50%) !important;
                 z-index: -1 !important;
             }
-
             .action-row, .pdf-hide, .btn-remove {
                 display: none !important;
             }
@@ -464,11 +464,15 @@
                 padding: 0 !important;
             }
             .objeto-textarea {
-                height: auto !important;
+                border: none !important; 
+                background: transparent !important; 
                 overflow: visible !important;
+                resize: none !important;
             }
-            tr, td, th, .info-grid, .totals-wrapper, .condiciones, .firmas-grid, .objeto-section {
+            /* Garantía anti-cortes de PDF */
+            tr, td, th, .info-block, .totals-table, .condiciones, .firma-box {
                 page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
             h1, h2, h3, h4 {
                 page-break-after: avoid !important;
@@ -493,12 +497,14 @@
             
             <div class="control-group-row" style="margin-left: auto;">
                 <button onclick="window.loginConGoogle()" class="btn-google" id="btnLogin"><i class="fa-brands fa-google"></i> Acceder</button>
-                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Sincronización Dual (Nube + Sheets)"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube</button>
+                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Sincronización (Firebase + Make.com)"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube</button>
                 <button onclick="window.descargarBitacoraCloud()" class="btn-download" id="btnDownload" style="display: none;" title="Descargar CSV del Historial"><i class="fa-solid fa-file-csv"></i> Historial</button>
                 <button onclick="window.generarPDFNativo()" class="btn-accent" title="Generar PDF Oficial"><i class="fa-solid fa-file-pdf"></i> Generar PDF</button>
             </div>
         </div>
-        <div id="statusMessage"></div>
+        <div class="control-row">
+            <div id="statusMessage"></div>
+        </div>
     </div>
 
     <div class="document-wrapper" id="cotizacionDoc">
@@ -597,7 +603,7 @@
         </div>
 
         <div class="totals-wrapper">
-            <!-- Tabla HTML Clásica e indestructible para los totales -->
+            <!-- TABLA INDESTRUCTIBLE PARA TOTALES -->
             <table class="totals-table">
                 <tr>
                     <td class="text-right">Subtotal Operativo:</td>
@@ -641,7 +647,7 @@
     </div>
 
     <!-- ==========================================================
-         🚀 LÓGICA CON FIREBASE Y GOOGLE SHEETS
+         🚀 LÓGICA CON FIREBASE Y PREPARACIÓN PARA MAKE.COM
          ========================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -658,8 +664,11 @@
             appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
         };
         
-        // URL DE TU GOOGLE SHEETS (Lectura y Escritura por GET)
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzJns2_5cr9RRbxhZS1fka1gm6MGB7LKUedm41iD9glgBoMEye4WlQabdSBen3Rr4qMew/exec";
+        // -------------------------------------------------------------
+        // ⚠️ CUANDO USES MAKE.COM, PEGA TU WEBHOOK URL AQUÍ (Ej: https://hook.eu1.make.com/...)
+        // Al estar en Make.com no tendrás problemas de CORS.
+        // -------------------------------------------------------------
+        const WEBHOOK_MAKE_URL = ""; 
 
         let db, auth, currentUser;
         let isFirebaseActive = false;
@@ -710,6 +719,7 @@
             });
         }
 
+        // CARGA EL CONSECUTIVO DESDE FIREBASE
         async function cargarConsecutivoCloud() {
             if (!currentUser || !db) return;
             try {
@@ -761,28 +771,24 @@
             };
 
             try {
-                // 1. Guardar en Firebase
+                // 1. Guardar y asegurar en Firebase
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
                 await addDoc(colRef, payload);
                 
-                // 2. Método Infalible para Google Sheets: GET Request
-                // Enviamos los datos adheridos a la URL. Los navegadores JAMÁS bloquean GET.
-                const params = new URLSearchParams(payload);
-                params.append("action", "save");
+                // 2. Sincronización transparente con Make.com (si la URL está configurada)
+                if(WEBHOOK_MAKE_URL && WEBHOOK_MAKE_URL.startsWith('http')) {
+                    fetch(WEBHOOK_MAKE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }).catch(e => console.log("Make.com ejecutado en segundo plano"));
+                }
                 
-                const finalSaveUrl = GOOGLE_SHEETS_URL + "?" + params.toString();
-                
-                fetch(finalSaveUrl, {
-                    method: 'GET',
-                    mode: 'no-cors' // Salta preflight
-                }).then(() => {
-                    window.mostrarMensaje('☁️ ¡Cotización guardada y sincronizada a Sheets!', 'success');
-                    
-                    const currentNum = parseInt(payload.consecutivo, 10);
-                    if (!isNaN(currentNum)) {
-                        document.getElementById('numCotizacion').innerText = ("000" + (currentNum + 1)).slice(-3);
-                    }
-                }).catch(e => console.log("Background sync error (ignorado)", e));
+                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente!', 'success');
+                const currentNum = parseInt(payload.consecutivo, 10);
+                if (!isNaN(currentNum)) {
+                    document.getElementById('numCotizacion').innerText = ("000" + (currentNum + 1)).slice(-3);
+                }
                 
             } catch (e) {
                 console.error("Error guardando:", e);
@@ -949,7 +955,10 @@
 
         window.generarPDFNativo = function() {
             window.autoResize(document.getElementById('objetoEstrategico'));
-            // Usamos impresión nativa. Asegúrate de habilitar "Gráficos de fondo" y deshabilitar "Encabezados y pie de página"
+            // LLamado nativo. Configuración obligatoria del navegador:
+            // 1. Márgenes: "Predeterminado"
+            // 2. Gráficos en segundo plano: Activo
+            // 3. Encabezados y pies de página: Desactivado
             window.print();
         }
 
