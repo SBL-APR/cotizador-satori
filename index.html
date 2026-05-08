@@ -243,7 +243,7 @@
             color: var(--fence-green);
         }
 
-        /* Bloque de datos (Migrado a Flexbox para estabilidad en PDF) */
+        /* Bloque de datos (Flexbox para estabilidad en PDF) */
         .info-grid {
             display: flex;
             justify-content: space-between;
@@ -425,11 +425,12 @@
 
         /* =======================================================
            🚀 PROTECCIÓN DE IMPRESIÓN NATIVA 
+           Márgenes físicos a 20mm
            ======================================================= */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 20mm 15mm !important; /* 20mm arriba/abajo soluciona el problema de la pág 2 pegada */
+                margin: 20mm 15mm !important; 
             }
             body { 
                 display: block !important; 
@@ -446,7 +447,7 @@
                 box-shadow: none !important; 
                 width: 100% !important; 
                 margin: 0 !important; 
-                padding: 0 !important; /* Los márgenes ahora los controla exclusivamente @page */
+                padding: 0 !important; 
             }
             .watermark-container {
                 position: fixed !important;
@@ -482,6 +483,10 @@
 </head>
 <body>
 
+    <!-- IFRAME Y FORMULARIO OCULTOS PARA BYPASS DE CORS HACIA GOOGLE SHEETS -->
+    <iframe id="sheetIframe" name="sheetIframe" style="display:none;"></iframe>
+    <form id="sheetForm" method="POST" target="sheetIframe" style="display:none;"></form>
+
     <div class="control-panel" id="controlPanel">
         <div class="control-row">
             <div class="control-group-row">
@@ -497,7 +502,7 @@
             
             <div class="control-group-row" style="margin-left: auto;">
                 <button onclick="window.loginConGoogle()" class="btn-google" id="btnLogin"><i class="fa-brands fa-google"></i> Acceder</button>
-                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Sincronización (Firebase + Make.com)"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube</button>
+                <button onclick="window.guardarRegistroCloud()" class="btn-save" id="btnSave" style="display: none;" title="Guardado Dual en Nube y Sheets"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Nube</button>
                 <button onclick="window.descargarBitacoraCloud()" class="btn-download" id="btnDownload" style="display: none;" title="Descargar CSV del Historial"><i class="fa-solid fa-file-csv"></i> Historial</button>
                 <button onclick="window.generarPDFNativo()" class="btn-accent" title="Generar PDF Oficial"><i class="fa-solid fa-file-pdf"></i> Generar PDF</button>
             </div>
@@ -603,7 +608,7 @@
         </div>
 
         <div class="totals-wrapper">
-            <!-- TABLA INDESTRUCTIBLE PARA TOTALES -->
+            <!-- TABLA INDESTRUCTIBLE PARA TOTALES (Corregida para evitar colapsos) -->
             <table class="totals-table">
                 <tr>
                     <td class="text-right">Subtotal Operativo:</td>
@@ -647,14 +652,16 @@
     </div>
 
     <!-- ==========================================================
-         🚀 LÓGICA CON FIREBASE Y PREPARACIÓN PARA MAKE.COM
+         🚀 LÓGICA CON FIREBASE Y GOOGLE SHEETS VIA FORM-IFRAME
          ========================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CREDENCIALES FIREBASE
+        // ======================================================================
+        // ⚠️ 1. PEGA AQUÍ TUS CREDENCIALES DE FIREBASE
+        // ======================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
             authDomain: "satori-bl-cotizador.firebaseapp.com",
@@ -664,11 +671,10 @@
             appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
         };
         
-        // -------------------------------------------------------------
-        // ⚠️ CUANDO USES MAKE.COM, PEGA TU WEBHOOK URL AQUÍ (Ej: https://hook.eu1.make.com/...)
-        // Al estar en Make.com no tendrás problemas de CORS.
-        // -------------------------------------------------------------
-        const WEBHOOK_MAKE_URL = ""; 
+        // ======================================================================
+        // ⚠️ 2. PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+        // ======================================================================
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzJns2_5cr9RRbxhZS1fka1gm6MGB7LKUedm41iD9glgBoMEye4WlQabdSBen3Rr4qMew/exec";
 
         let db, auth, currentUser;
         let isFirebaseActive = false;
@@ -719,22 +725,18 @@
             });
         }
 
-        // CARGA EL CONSECUTIVO DESDE FIREBASE
+        // Leer consecutivo desde Sheets via GET limpio
         async function cargarConsecutivoCloud() {
-            if (!currentUser || !db) return;
+            if (!GOOGLE_SHEETS_URL) return;
             try {
-                const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
-                const snapshot = await getDocs(colRef);
-                
-                let maxConsecutivo = 0;
-                snapshot.forEach(doc => {
-                    const num = parseInt(doc.data().consecutivo, 10);
-                    if (!isNaN(num) && num > maxConsecutivo) { maxConsecutivo = num; }
-                });
-                
-                const nextNumber = ("000" + (maxConsecutivo + 1)).slice(-3);
-                document.getElementById('numCotizacion').innerText = nextNumber;
-            } catch (e) { console.error("Error cargando consecutivo:", e); }
+                const resp = await fetch(GOOGLE_SHEETS_URL);
+                const result = await resp.json();
+                if (result && result.nextConsecutivo) {
+                    document.getElementById('numCotizacion').innerText = result.nextConsecutivo;
+                }
+            } catch (e) {
+                console.error("Error cargando consecutivo desde Sheets:", e);
+            }
         }
 
         window.guardarRegistroCloud = async function() {
@@ -756,6 +758,7 @@
             });
 
             const payload = {
+                action: "save",
                 consecutivo: document.getElementById('numCotizacion').innerText.trim(),
                 fecha: document.getElementById('fechaEmision').value,
                 cliente: document.getElementById('clienteNombre').innerText.trim(),
@@ -775,16 +778,28 @@
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
                 await addDoc(colRef, payload);
                 
-                // 2. Sincronización transparente con Make.com (si la URL está configurada)
-                if(WEBHOOK_MAKE_URL && WEBHOOK_MAKE_URL.startsWith('http')) {
-                    fetch(WEBHOOK_MAKE_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    }).catch(e => console.log("Make.com ejecutado en segundo plano"));
-                }
+                // 2. MÉTODO INFALIBLE: Formulario Oculto para Google Sheets
+                const form = document.getElementById('sheetForm');
+                const iframe = document.getElementById('sheetIframe');
                 
-                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente!', 'success');
+                // Limpiar y recrear campos
+                form.innerHTML = '';
+                Object.keys(payload).forEach(key => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = String(payload[key]);
+                    form.appendChild(input);
+                });
+                
+                // Resetear iframe y enviar
+                iframe.src = 'about:blank';
+                form.action = GOOGLE_SHEETS_URL;
+                form.submit();
+                
+                window.mostrarMensaje('☁️ ¡Cotización guardada exitosamente y enviada a Sheets!', 'success');
+                
+                // Actualizar UI
                 const currentNum = parseInt(payload.consecutivo, 10);
                 if (!isNaN(currentNum)) {
                     document.getElementById('numCotizacion').innerText = ("000" + (currentNum + 1)).slice(-3);
@@ -955,10 +970,7 @@
 
         window.generarPDFNativo = function() {
             window.autoResize(document.getElementById('objetoEstrategico'));
-            // LLamado nativo. Configuración obligatoria del navegador:
-            // 1. Márgenes: "Predeterminado"
-            // 2. Gráficos en segundo plano: Activo
-            // 3. Encabezados y pies de página: Desactivado
+            // Usamos impresión nativa. Asegúrate de habilitar "Gráficos de fondo" y deshabilitar "Encabezados y pie de página"
             window.print();
         }
 
