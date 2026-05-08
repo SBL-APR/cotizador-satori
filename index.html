@@ -131,7 +131,7 @@
         .status-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .status-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-        /* --- DOCUMENTO EN PANTALLA --- */
+        /* --- DOCUMENTO EKRANE --- */
         .document-wrapper {
             background: #ffffff;
             width: 210mm; 
@@ -331,46 +331,39 @@
             margin-bottom: 30px;
         }
         
-        /* SOLUCIÓN AL COLAPSO DE TOTALES: Flotantes estándar que nunca rompen en impresión */
+        /* SOLUCIÓN AL COLAPSO DE TOTALES: Tabla estricta HTML indestructible */
         .totals-wrapper {
+            display: block;
             width: 100%;
-            overflow: hidden;
             margin-bottom: 20px;
             page-break-inside: avoid !important;
         }
-        .totals-box {
-            float: right;
+        .totals-table {
             width: 350px;
+            margin-left: auto; /* Alinea a la derecha de forma segura */
             background-color: var(--venetian-lace);
             border-radius: 8px;
             padding: 15px 20px;
+            border-collapse: separate;
+            border-spacing: 0;
         }
-        .total-line {
-            display: block;
-            clear: both;
+        .totals-table td {
             padding: 6px 0;
             font-size: 14px;
-            width: 100%;
-            overflow: hidden;
+            border: none;
+            background: transparent;
+            color: var(--fence-green);
         }
-        .total-line span:first-child {
-            float: left;
-        }
-        .total-line span:last-child {
-            float: right;
-            font-weight: 500;
-        }
-        .total-line.final {
+        .totals-table tr.final td {
             border-top: 2px solid var(--fence-green);
-            margin-top: 5px;
-            padding-top: 10px;
-        }
-        .total-line.final span:last-child {
             font-weight: 700;
             font-size: 18px;
             color: var(--fiery-glow);
             font-family: var(--font-heading);
+            padding-top: 10px;
+            margin-top: 5px;
         }
+        .text-right { text-align: right; }
 
         .total-letras {
             text-align: right;
@@ -403,7 +396,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 60px;
             margin-top: 10px;
-            page-break-inside: avoid !important; /* Evita que la firma se divida en 2 hojas */
+            page-break-inside: avoid !important;
         }
         .firma-box {
             border-top: 1px solid var(--fence-green);
@@ -425,13 +418,14 @@
         .btn-remove:hover { opacity: 1; }
 
         /* =======================================================
-           🚀 BLINDAJE DE IMPRESIÓN PDF
-           Se eliminan transformaciones para que el navegador rinda 1:1
+           🚀 PROTECCIÓN DE IMPRESIÓN NATIVA 
+           Aumentadas las márgenes superiores a 25mm
            ======================================================= */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 15mm !important; /* Márgenes físicos perfectos */
+                /* Incrementado a 25mm arriba/abajo para que la pág 2 respire */
+                margin: 25mm 20mm !important; 
             }
             body { 
                 display: block !important; 
@@ -483,9 +477,6 @@
     </style>
 </head>
 <body>
-
-    <!-- Iframe oculto para método infalible de guardado en Sheets (Adiós CORS) -->
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
     <div class="control-panel" id="controlPanel">
         <div class="control-row">
@@ -606,20 +597,21 @@
         </div>
 
         <div class="totals-wrapper">
-            <div class="totals-box">
-                <div class="total-line">
-                    <span>Subtotal Operativo:</span>
-                    <span id="valSubtotal">$ 0</span>
-                </div>
-                <div class="total-line">
-                    <span>IVA (<span class="editable" id="ivaPorcentaje" contenteditable="true" oninput="window.calcularTotales()">0</span>%):</span>
-                    <span id="valIva">$ 0</span>
-                </div>
-                <div class="total-line final">
-                    <span>Inversión Total (COP):</span>
-                    <span id="valTotal">$ 0</span>
-                </div>
-            </div>
+            <!-- Tabla HTML Clásica e indestructible para los totales -->
+            <table class="totals-table">
+                <tr>
+                    <td class="text-right">Subtotal Operativo:</td>
+                    <td class="text-right" id="valSubtotal" style="width: 130px;">$ 0</td>
+                </tr>
+                <tr>
+                    <td class="text-right">IVA (<span class="editable" id="ivaPorcentaje" contenteditable="true" oninput="window.calcularTotales()">0</span>%):</td>
+                    <td class="text-right" id="valIva">$ 0</td>
+                </tr>
+                <tr class="final">
+                    <td class="text-right">Inversión Total (COP):</td>
+                    <td class="text-right" id="valTotal">$ 0</td>
+                </tr>
+            </table>
         </div>
 
         <div class="total-letras" id="totalLetras">
@@ -656,9 +648,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ======================================================================
-        // ⚠️ PEGA AQUÍ TUS CREDENCIALES DE FIREBASE
-        // ======================================================================
+        // CREDENCIALES FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBzk6EqZpSiWAidL1FcWORy6seanFGzZx8",
             authDomain: "satori-bl-cotizador.firebaseapp.com",
@@ -668,10 +658,8 @@
             appId: "1:671211767556:web:54b1a45fe8bed22d0df251"
         };
         
-        // ======================================================================
-        // ⚠️ PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-        // ======================================================================
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxWOkjit1hliGAdvva0w6w1-7GysTcdChrLr382DlGvleUyko_W6lSAaNWdKPbFJPi1rg/exec";
+        // URL DE TU GOOGLE SHEETS (Lectura y Escritura por GET)
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzJns2_5cr9RRbxhZS1fka1gm6MGB7LKUedm41iD9glgBoMEye4WlQabdSBen3Rr4qMew/exec";
 
         let db, auth, currentUser;
         let isFirebaseActive = false;
@@ -703,7 +691,7 @@
                 }
             });
         } catch (e) {
-            console.error("Firebase Error:", e);
+            console.error("Error de Firebase:", e);
         }
 
         window.mostrarMensaje = function(texto, tipo) {
@@ -773,36 +761,29 @@
             };
 
             try {
-                // 1. Guardar seguro en Firebase
+                // 1. Guardar en Firebase
                 const colRef = collection(db, 'usuarios', currentUser.uid, 'cotizaciones');
                 await addDoc(colRef, payload);
                 
-                // 2. Método Infalible para Google Sheets: Formulario Oculto
-                // Esto bypassa absolutamente todos los bloqueos de CORS del navegador
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = GOOGLE_SHEETS_URL;
-                form.target = 'hidden_iframe';
+                // 2. Método Infalible para Google Sheets: GET Request
+                // Enviamos los datos adheridos a la URL. Los navegadores JAMÁS bloquean GET.
+                const params = new URLSearchParams(payload);
+                params.append("action", "save");
                 
-                for (let key in payload) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = key;
-                    input.value = payload[key];
-                    form.appendChild(input);
-                }
-                document.body.appendChild(form);
-                form.submit();
+                const finalSaveUrl = GOOGLE_SHEETS_URL + "?" + params.toString();
                 
-                // Limpiar el formulario después de enviarlo
-                setTimeout(() => { document.body.removeChild(form); }, 2000);
-
-                window.mostrarMensaje('☁️ ¡Cotización guardada y sincronizada a Sheets!', 'success');
+                fetch(finalSaveUrl, {
+                    method: 'GET',
+                    mode: 'no-cors' // Salta preflight
+                }).then(() => {
+                    window.mostrarMensaje('☁️ ¡Cotización guardada y sincronizada a Sheets!', 'success');
+                    
+                    const currentNum = parseInt(payload.consecutivo, 10);
+                    if (!isNaN(currentNum)) {
+                        document.getElementById('numCotizacion').innerText = ("000" + (currentNum + 1)).slice(-3);
+                    }
+                }).catch(e => console.log("Background sync error (ignorado)", e));
                 
-                const currentNum = parseInt(payload.consecutivo, 10);
-                if (!isNaN(currentNum)) {
-                    document.getElementById('numCotizacion').innerText = ("000" + (currentNum + 1)).slice(-3);
-                }
             } catch (e) {
                 console.error("Error guardando:", e);
                 window.mostrarMensaje('❌ Error al guardar en Firebase.', 'error');
@@ -968,6 +949,7 @@
 
         window.generarPDFNativo = function() {
             window.autoResize(document.getElementById('objetoEstrategico'));
+            // Usamos impresión nativa. Asegúrate de habilitar "Gráficos de fondo" y deshabilitar "Encabezados y pie de página"
             window.print();
         }
 
